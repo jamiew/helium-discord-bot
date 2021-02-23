@@ -1,0 +1,22 @@
+{
+  "name": "hotspot-bot",
+  "version": "0.1",
+  "description": "Helium hotspot stats",
+  "main": "bot.js",
+  "repository": "https://github.com/jamiew/helium-hotspot-bot",
+  "author": "Jamie Wilkinson <jamie@jamiedubs.com>",
+  "license": "MIT",
+  "dependencies": {
+    "discord.js": "^12.4.1",
+    "dotenv": "^8.2.0",
+    "request": "^2.88.2",
+    "request-promise-native": "^1.0.9"
+  },
+  "scripts": {
+    "start": "node bot.js",
+    "test": "node test.js"
+  },
+  "engines": {
+    "node": "14"
+  }
+}
