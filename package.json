@@ -1,6 +1,6 @@
 {
   "name": "hotspot-bot",
-  "version": "0.1",
+  "version": "0.1.0",
   "description": "Helium hotspot stats",
   "main": "bot.js",
   "repository": "https://github.com/jamiew/helium-hotspot-bot",
