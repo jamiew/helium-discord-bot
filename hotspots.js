@@ -79,7 +79,7 @@ const getNameForAddress = function(ownerAddress, hotspotAddress) {
   let owners = listOwners();
 
   if (owners !== undefined) {
-    return onwers.get(ownerAddress);
+    return owners.get(ownerAddress);
   }
 
   return listHotspots().get(hotspotAddress);
