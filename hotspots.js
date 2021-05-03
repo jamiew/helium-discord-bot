@@ -34,6 +34,10 @@ const fetchActivityForHotspot = function (address, params) {
   return httpGet(`https://api.helium.io/v1/hotspots/${address}/activity${queryParams()}`);
 };
 
+const fetchHotspotDetails = function (address) {
+  return httpGet(`https://api.helium.io/v1/hotspots/${address}`);
+};
+
 const formatDate = function (date) {
   // hard-set to midnight UTC on the date specified
   // return date.toISOString().substr(0, 10) + "T00:00:00Z";
@@ -60,24 +64,49 @@ const listOwners = function () {
   return owners;
 };
 
-const getOwnerForHotspot = function(address) {
-  return listOwners().get(address);
+const listHotspots = function () {
+  if (!process.env.HOTSPOTS) {
+    return undefined;
+  }
+
+  const entries = process.env.HOTSPOTS.split(",");
+  const hotspots = new Map(entries.map(x => x.split(':')));
+  return hotspots;
+};
+
+const getOwnerForHotspot = function(ownerAddress, hotspotAddress) {
+  if (listOwners() !== undefined) {
+    return listOwners().get(ownerAddress);
+  }
+  else {
+    return listHotspots().get(hotspotAddress);
+  }
 }
 
 const fetchEverything = async function () {
   // abort if HOTSPOT_OWNERS is not set (see .env)
-  if (listOwners() === undefined) {
-    log("helium-hotspots: HOTSPOT_OWNERS is not set, please check your .env");
+  if (listOwners() === undefined && listHotspots() === undefined) {
+    log("helium-hotspots: HOTSPOT_OWNERS and HOTSPOTS are not set, please check your .env");
     return;
   }
 
   // fetch hotspots for our owners
   // TODO make this execute in parallel
   let hotspots = [];
-  for (let owner of listOwners()) {
-    let _hotspots = await fetchHotspotsForOwner(owner[0]);
-    log(`Found ${_hotspots.length} hotspots for ${owner[0]} owned by ${owner[1]}`);
-    hotspots = hotspots.concat(_hotspots);
+
+  if (listOwners() !== undefined) {
+    for (let owner of listOwners()) {
+      let _hotspots = await fetchHotspotsForOwner(owner[0]);
+      log(`Found ${_hotspots.length} hotspots for ${owner[0]} owned by ${owner[1]}`);
+      hotspots = hotspots.concat(_hotspots);
+    }
+  }
+
+  if (listHotspots() !== undefined) {
+    for (let hotspot of listHotspots()) {
+      let _hotspot = await fetchHotspotDetails(hotspot[0]);
+      hotspots.push(_hotspot);
+    }
   }
 
   // hydrate with reward and activity data
@@ -103,8 +132,8 @@ const fetchEverything = async function () {
   for (let i = 0; i < hotspots.length; i++) {
     const hotspot = hotspots[i];
     const hnt = hotspot["rewards_24h"].toFixed(2);
-    const owner = getOwnerForHotspot(hotspot["owner"]);
-    output += `${hnt.toString().padEnd(7)} ${hotspot["name"].padEnd(25)}  @${owner}\n`;
+    const ownerName = getOwnerForHotspot(hotspot["owner"], hotspot["address"]);
+    output += `${hnt.toString().padEnd(7)} ${hotspot["name"].padEnd(25)}  @${ownerName}\n`;
       // `[x](https://explorer.helium.com/address/${hotspot["address"]}`
   }
 
