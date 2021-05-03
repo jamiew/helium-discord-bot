@@ -3,6 +3,8 @@
 // #antennalife
 
 const request = require("request-promise-native");
+const Config = require('./config');
+
 require('dotenv').config();
 
 const log = function (message) {
@@ -59,10 +61,9 @@ const listOwners = function () {
   if (!process.env.HOTSPOT_OWNERS) {
     return undefined;
   }
-
-  const entries = process.env.HOTSPOT_OWNERS.split(",");
-  const owners = new Map(entries.map(x => x.split(':')));
-  return owners;
+  // const entries = process.env.HOTSPOT_OWNERS.split(",");
+  // const owners = new Map(entries.map(x => x.split(':')));
+  return new Map(Config.getOwners().map(x => [x['address'], x['name']] ));
 };
 
 const listHotspots = function () {
