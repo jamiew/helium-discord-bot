@@ -3,6 +3,7 @@
 // #antennalife
 
 const request = require("request-promise-native");
+require('dotenv').config();
 
 const log = function (message) {
   console.log("helium-hotspots: " + message);
@@ -129,12 +130,21 @@ const fetchEverything = async function () {
   let output = "";
   output += "```ml\n";
 
+  let sum = 0;
   for (let i = 0; i < hotspots.length; i++) {
     const hotspot = hotspots[i];
     const hnt = hotspot["rewards_24h"].toFixed(2);
+    sum += parseFloat(hnt);
     const ownerName = getOwnerForHotspot(hotspot["owner"], hotspot["address"]);
-    output += `${hnt.toString().padEnd(7)} ${hotspot["name"].padEnd(25)}  @${ownerName}\n`;
+    const blocksBehind = hotspot['block'] - hotspot['last_change_block'];
+
+    output += `${hnt.toString().padEnd(7)} ${hotspot["name"].padEnd(29)} @${ownerName.padEnd(10)} ${blocksBehind >= 100 ? blocksBehind + " behind" : ""}\n`;
       // `[x](https://explorer.helium.com/address/${hotspot["address"]}`
+  }
+
+  if (process.env.SHOW_TOTAL == '1') {
+    output += `---------------------------------------------\n`
+    output += `${sum.toFixed(2)}\n`
   }
 
   output += "```\n";
