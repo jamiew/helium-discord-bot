@@ -43,7 +43,9 @@ You can list all hotspots in a given account using `HOTSPOT_OWNERS`, or just jus
 
 ## Talk to the bot
 
-Write `hotspots stats` in a Discord channel and the bot should respond with:
+Write `hotspot help` to see all the commands for managing owners/hotspots:
+
+Then send `hotspot stats` to see the stats:
 
 ```
 34.83  Electric-Metal-Jaguar 'Joe' 00
