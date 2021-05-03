@@ -58,31 +58,21 @@ const dateTimeParams = function () {
 };
 
 const listOwners = function () {
-  if (!process.env.HOTSPOT_OWNERS) {
-    return undefined;
-  }
-  // const entries = process.env.HOTSPOT_OWNERS.split(",");
-  // const owners = new Map(entries.map(x => x.split(':')));
   return new Map(Config.getOwners().map(x => [x['address'], x['name']] ));
 };
 
 const listHotspots = function () {
-  if (!process.env.HOTSPOTS) {
-    return undefined;
-  }
-
-  const entries = process.env.HOTSPOTS.split(",");
-  const hotspots = new Map(entries.map(x => x.split(':')));
-  return hotspots;
+  return new Map(Config.getHotspots().map(x => [x['address'], x['name']] ));
 };
 
-const getOwnerForHotspot = function(ownerAddress, hotspotAddress) {
-  if (listOwners() !== undefined) {
-    return listOwners().get(ownerAddress);
-  }
-  else {
+const getNameForAddress = function(ownerAddress, hotspotAddress) {
+  let name = listOwners().get(ownerAddress);
+
+  if (name === undefined) {
     return listHotspots().get(hotspotAddress);
   }
+  
+  return name;
 }
 
 const fetchEverything = async function () {
@@ -136,7 +126,7 @@ const fetchEverything = async function () {
     const hotspot = hotspots[i];
     const hnt = hotspot["rewards_24h"].toFixed(2);
     sum += parseFloat(hnt);
-    const ownerName = getOwnerForHotspot(hotspot["owner"], hotspot["address"]);
+    const ownerName = getNameForAddress(hotspot["owner"], hotspot["address"]);
     const blocksBehind = hotspot['block'] - hotspot['last_change_block'];
 
     output += `${hnt.toString().padEnd(7)} ${hotspot["name"].padEnd(29)} @${ownerName.padEnd(10)} ${blocksBehind >= 100 ? blocksBehind + " behind" : ""}\n`;
