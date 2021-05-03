@@ -77,12 +77,17 @@ const listHotspots = function () {
 
 const getNameForAddress = function(ownerAddress, hotspotAddress) {
   let owners = listOwners();
-
+  let name;
+  
   if (owners !== undefined) {
-    return owners.get(ownerAddress);
+    name = owners.get(ownerAddress);
   }
 
-  return listHotspots().get(hotspotAddress);
+  if (name === undefined) {
+    return listHotspots().get(hotspotAddress);
+  }
+
+  return name;
 }
 
 const fetchEverything = async function () {
