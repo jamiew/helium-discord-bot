@@ -4,14 +4,19 @@ Display stats about Helium hotspots in your Discord server. Fun for leaderboards
 
 ## Setup
 
-Install nodejs, yarn, and run:
+Install [nodejs](https://nodejs.org/en/) and [yarn](https://yarnpkg.com/) and run:
 
 ```
-cp .env.sample .env
 yarn install
 ```
 
-Currently expecting node v14 -- see `engines` in `package.json`
+Currently expecting nodejs v14-ish, modify `engines` in `package.json` if you want to use something else.
+
+Then make a copy of the default `.env` file:
+
+```
+cp .env.sample .env
+```
 
 ## Adding the bot to Discord
 
