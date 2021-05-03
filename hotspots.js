@@ -58,27 +58,37 @@ const dateTimeParams = function () {
 };
 
 const listOwners = function () {
-  return new Map(Config.getOwners().map(x => [x['address'], x['name']] ));
+  let owners = Config.getOwners();
+  if (owners === undefined) {
+    return undefined;
+  }
+
+  return new Map(owners.map(x => [x['address'], x['name']] ));
 };
 
 const listHotspots = function () {
-  return new Map(Config.getHotspots().map(x => [x['address'], x['name']] ));
+  let hotspots = Config.getHotspots();
+  if (hotspots === undefined) {
+    return undefined;
+  }
+
+  return new Map(hotspots.map(x => [x['address'], x['name']] ));
 };
 
 const getNameForAddress = function(ownerAddress, hotspotAddress) {
-  let name = listOwners().get(ownerAddress);
+  let owners = listOwners();
 
-  if (name === undefined) {
-    return listHotspots().get(hotspotAddress);
+  if (owners !== undefined) {
+    return onwers.get(ownerAddress);
   }
-  
-  return name;
+
+  return listHotspots().get(hotspotAddress);
 }
 
 const fetchEverything = async function () {
   // abort if HOTSPOT_OWNERS is not set (see .env)
   if (listOwners() === undefined && listHotspots() === undefined) {
-    log("helium-hotspots: HOTSPOT_OWNERS and HOTSPOTS are not set, please check your .env");
+    log("helium-hotspots: HOTSPOTS and OWNERS are not set, please add some using the bot commands");
     return;
   }
 
@@ -133,7 +143,7 @@ const fetchEverything = async function () {
       // `[x](https://explorer.helium.com/address/${hotspot["address"]}`
   }
 
-  if (process.env.SHOW_TOTAL == '1') {
+  if (process.env.SHOW_TOTAL == '1' && hotspots.length > 1) {
     output += `---------------------------------------------\n`
     output += `${sum.toFixed(2)}\n`
   }

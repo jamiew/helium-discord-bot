@@ -32,7 +32,12 @@ client.on('message', async message => {
     case 'hotspot stat':
       await message.channel.send("✨ Checking the blockchain, stand by...");
       output = await Hotspots.fetchEverything();
-      await message.channel.send(output);
+      if (output !== undefined) {
+        await message.channel.send(output);
+      }
+      else {
+        await message.channel.send("No hotspots/owners have been added yet. `hotspot help` to see how.")
+      }
       break;
 
     case 'hotspot config':
