@@ -21,9 +21,9 @@ client.on('message', async message => {
       output += "hotspot stats\n"
       output += "hotspot config\n"
       output += "hotspot add {address} {name}\n"
-      output += "hotspot remove {address} {name}\n"
+      output += "hotspot remove {address}\n"
       output += "host add {address} {name}\n"
-      output += "host remove {address} {name}\n"
+      output += "host remove {address}\n"
       output += "\n```";
       await message.channel.send(output);
       break;
