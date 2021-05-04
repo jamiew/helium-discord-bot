@@ -43,11 +43,13 @@ client.on('message', async message => {
     case 'hotspot config':
       output = "```ml\n";
       output += 'OWNERS\n';
+      if(Config.getOwners().length == 0){ output += "None\n"; }
       Config.getOwners().forEach(owner => {
         output += `${owner['name']} > ${owner['address']}\n`
       });
 
       output += '\nHOTSPOTS\n';
+      if(Config.getHotspots().length == 0){ output += "None\n"; }
       Config.getHotspots().forEach(hotspot => {
         output += `${hotspot['name']} > ${hotspot['address']}\n`
       });
