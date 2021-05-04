@@ -5,11 +5,12 @@ const OWNERS_KEY = 'owners';
 const HOTSPOTS_KEY = 'hotspots';
 
 const getConfig = function () {
-  let rawdata;
+  let rawdata = undefined;
   try {
     rawdata = fs.readFileSync(process.env.CONFIG_PATH, (err) => {});
-  } catch(err) {}
-  // console.log("getConfig", rawdata);
+  } catch(err) {
+    console.error(`Error reading config file at: ${process.env.CONFIG_PATH}`);
+  }
   return rawdata === undefined ? {} : JSON.parse(rawdata);
 };
 
@@ -35,8 +36,8 @@ const addHotspotAddress = async function (address, name) {
 };
 
 const removeHotspotAddress = function (address) {
-  let config = getConfig();
-  var filtered = config[HOTSPOTS_KEY].filter(h => h['address'] != address);
+  const config = getConfig();
+  const filtered = config[HOTSPOTS_KEY].filter(h => h['address'] != address);
   config[HOTSPOTS_KEY] = filtered;
   saveConfig(config);
 };
@@ -57,8 +58,8 @@ const addOwnerAddress = function (address, name) {
 };
 
 const removeOwnerAddress = function (address) {
-  let config = getConfig();
-  var filtered = config[OWNERS_KEY].filter(h => h['address'] != address);
+  const config = getConfig();
+  const filtered = config[OWNERS_KEY].filter(h => h['address'] != address);
   config[OWNERS_KEY] = filtered;
   saveConfig(config);
 };
