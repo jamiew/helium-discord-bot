@@ -144,7 +144,7 @@ const fetchEverything = async function () {
     const ownerName = getNameForAddress(hotspot["owner"], hotspot["address"]);
     const blocksBehind = hotspot['block'] - hotspot['last_change_block'];
 
-    output += `${hnt.toString().padEnd(7)} ${hotspot["name"].padEnd(29)} @${ownerName.padEnd(10)} ${blocksBehind >= env.process.BLOCK_WARNING_THRESHOLD ? blocksBehind + " behind" : ""}\n`;
+    output += `${hnt.toString().padEnd(7)} ${hotspot["name"].padEnd(29)} @${ownerName.padEnd(10)} ${blocksBehind >= parseInt(process.env.BLOCK_WARNING_THRESHOLD) ? blocksBehind + " behind" : ""}\n`;
       // `[x](https://explorer.helium.com/address/${hotspot["address"]}`
   }
 
