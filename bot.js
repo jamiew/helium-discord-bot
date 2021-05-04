@@ -47,7 +47,7 @@ client.on('message', async message => {
         output += `${owner['name']} > ${owner['address']}\n`
       });
 
-      output += '\HOTSPOTS\n';
+      output += '\nHOTSPOTS\n';
       Config.getHotspots().forEach(hotspot => {
         output += `${hotspot['name']} > ${hotspot['address']}\n`
       });
