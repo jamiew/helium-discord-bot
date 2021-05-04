@@ -7,7 +7,7 @@ const HOTSPOTS_KEY = 'hotspots';
 const getConfig = function () {
   let rawdata = undefined;
   try {
-    rawdata = fs.readFileSync(process.env.CONFIG_PATH, (err) => {});
+    rawdata = fs.readFileSync(process.env.CONFIG_PATH, () => {});
   } catch(err) {
     console.error(`Error reading config file at: ${process.env.CONFIG_PATH}`);
   }
