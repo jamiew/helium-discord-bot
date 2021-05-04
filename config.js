@@ -1,54 +1,55 @@
 require('dotenv').config();
 const fs = require('fs');
 
-const OwnerName = 'owners';
-const HotspotName = 'hotspots';
+const OWNERS_KEY = 'owners';
+const HOTSPOTS_KEY = 'hotspots';
 
 const getConfig = function () {
-  let rawdata;
+  let rawdata = undefined;
   try {
-    rawdata = fs.readFileSync(process.env.CONFIG_PATH, (err) => {});
-  } catch(err) {}
-  // console.log("getConfig", rawdata);
+    rawdata = fs.readFileSync(process.env.CONFIG_PATH, () => {});
+  } catch(err) {
+    console.error(`Error reading config file at: ${process.env.CONFIG_PATH}`);
+  }
   return rawdata === undefined ? {} : JSON.parse(rawdata);
 };
 
 const saveConfig = function (obj) {
   console.log("saveConfig", obj);
-  fs.writeFileSync(process.env.CONFIG_PATH, JSON.stringify(obj), err => { 
+  fs.writeFileSync(process.env.CONFIG_PATH, JSON.stringify(obj), err => {
     console.log(err);
   });
 };
 
 const addHotspotAddress = async function (address, name) {
   let config = await getConfig();
-  if (config[HotspotName] == null) {
-    config[HotspotName] = [];
+  if (config[HOTSPOTS_KEY] == null) {
+    config[HOTSPOTS_KEY] = [];
   }
 
-  config[HotspotName].push({
+  config[HOTSPOTS_KEY].push({
     "address": address,
     "name": name
   });
-  
+
   saveConfig(config);
 };
 
 const removeHotspotAddress = function (address) {
-  let config = getConfig();
-  var filtered = config[HotspotName].filter(h => h['address'] != address);
-  config[HotspotName] = filtered;
+  const config = getConfig();
+  const filtered = config[HOTSPOTS_KEY].filter(h => h['address'] != address);
+  config[HOTSPOTS_KEY] = filtered;
   saveConfig(config);
 };
 
 const addOwnerAddress = function (address, name) {
   let config = getConfig();
 
-  if (config[OwnerName] == null) {
-    config[OwnerName] = [];
+  if (config[OWNERS_KEY] == null) {
+    config[OWNERS_KEY] = [];
   }
 
-  config[OwnerName].push({
+  config[OWNERS_KEY].push({
     "address": address,
     "name": name
   });
@@ -57,18 +58,18 @@ const addOwnerAddress = function (address, name) {
 };
 
 const removeOwnerAddress = function (address) {
-  let config = getConfig();
-  var filtered = config[OwnerName].filter(h => h['address'] != address);
-  config[OwnerName] = filtered;
+  const config = getConfig();
+  const filtered = config[OWNERS_KEY].filter(h => h['address'] != address);
+  config[OWNERS_KEY] = filtered;
   saveConfig(config);
 };
 
 const getOwners = function () {
-  return getConfig()[OwnerName];
+  return getConfig()[OWNERS_KEY] || [];
 }
 
 const getHotspots = function () {
-  return getConfig()[HotspotName];
+  return getConfig()[HOTSPOTS_KEY] || [];
 }
 
 module.exports = {

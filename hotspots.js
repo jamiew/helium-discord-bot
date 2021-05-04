@@ -25,16 +25,8 @@ const fetchHotspotsForOwner = function (owner) {
   return httpGet(`https://api.helium.io/v1/accounts/${owner}/hotspots`);
 };
 
-const fetchRewardsForHotspot = function (address) {
-  return httpGet(`https://api.helium.io/v1/hotspots/${address}/rewards${queryParams()}`);
-};
-
-const fetchRewardSumForHotspot = function (address, params) {
+const fetchRewardSumForHotspot = function (address) {
   return httpGet(`https://api.helium.io/v1/hotspots/${address}/rewards/sum${queryParams()}`);
-};
-
-const fetchActivityForHotspot = function (address, params) {
-  return httpGet(`https://api.helium.io/v1/hotspots/${address}/activity${queryParams()}`);
 };
 
 const fetchHotspotDetails = function (address) {
@@ -78,7 +70,7 @@ const listHotspots = function () {
 const getNameForAddress = function(ownerAddress, hotspotAddress) {
   let owners = listOwners();
   let name;
-  
+
   if (owners !== undefined) {
     name = owners.get(ownerAddress);
   }
