@@ -21,7 +21,7 @@ cp .env.sample .env
 ## Adding the bot to Discord
 
 - Create a [Discord app](https://discord.com/developers/applications)
-- Copy the `Application ID` and set `DISCORD_APPLICATION_ID` in your `.env`
+- Copy the `Application ID` and set `DISCORD_CLIENT_ID` in your `.env`
 - Create a bot for the app
 - Copy the bot `token` and set `DISCORD_TOKEN` in your `.env`
 
