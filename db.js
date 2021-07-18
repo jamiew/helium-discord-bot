@@ -4,7 +4,7 @@ const FileSync = require('lowdb/adapters/FileSync')
 const adapter = new FileSync(process.env.CONFIG_PATH)
 const db = low(adapter)
 
-db.defaults({ owners: [], hotspots: [] }).write()
+db.defaults({ owners: [], hotspots: [], validators: [] }).write()
 
 const addHotspotAddress = async function (address, name) {
   db.get('hotspots').push({
