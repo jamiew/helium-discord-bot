@@ -3,7 +3,7 @@
 // #antennalife
 
 const request = require("request-promise-native");
-const Config = require('./config');
+const DB = require('./db');
 
 require('dotenv').config();
 
@@ -18,19 +18,29 @@ const httpGet = async function (url) {
     method: "GET",
     json: true,
   });
-  return result.data;
+  return result;
 };
 
-const fetchHotspotsForOwner = function (owner) {
-  return httpGet(`https://api.helium.io/v1/accounts/${owner}/hotspots`);
+const fetchHotspotsForOwner = async function (owner) {
+  let rsp = await httpGet(`https://api.helium.io/v1/accounts/${owner}/hotspots`);
+  return rsp.data;
 };
 
-const fetchRewardSumForHotspot = function (address) {
-  return httpGet(`https://api.helium.io/v1/hotspots/${address}/rewards/sum${queryParams()}`);
+const fetchRewardSumForHotspot = async function (address) {
+  let rsp = await httpGet(`https://api.helium.io/v1/hotspots/${address}/rewards/sum${queryParams()}`);
+  return rsp.data;
 };
 
-const fetchHotspotDetails = function (address) {
-  return httpGet(`https://api.helium.io/v1/hotspots/${address}`);
+const fetchHotspotDetails = async function (address) {
+  let rsp = await httpGet(`https://api.helium.io/v1/hotspots/${address}`);
+  return rsp.data;
+};
+
+const fetchTotalRewardsForValidator = async function (address) {
+  let url = `https://api.helium.io/v1/validators/${address}/rewards/sum?min_time=2020-01-01&max_time=2050-01-01`;
+  let rsp = await httpGet(url);
+  // rsp = await httpGet(`${url}&cursor=${rsp['cursor']}`);
+  return rsp.data;
 };
 
 const formatDate = function (date) {
@@ -49,8 +59,17 @@ const dateTimeParams = function () {
   return "max_time=" + formatDate(maxTime) + "&min_time=" + formatDate(minTime);
 };
 
+const listValidators = function () {
+  let validators = DB.getValidators();
+  if (validators === undefined) {
+    return undefined;
+  }
+
+  return new Map(validators.map(x => [x['address'], x['name']] ));
+};
+
 const listOwners = function () {
-  let owners = Config.getOwners();
+  let owners = DB.getOwners();
   if (owners === undefined) {
     return undefined;
   }
@@ -59,7 +78,7 @@ const listOwners = function () {
 };
 
 const listHotspots = function () {
-  let hotspots = Config.getHotspots();
+  let hotspots = DB.getHotspots();
   if (hotspots === undefined) {
     return undefined;
   }
@@ -67,24 +86,9 @@ const listHotspots = function () {
   return new Map(hotspots.map(x => [x['address'], x['name']] ));
 };
 
-const getNameForAddress = function(ownerAddress, hotspotAddress) {
-  let owners = listOwners();
-  let name;
-
-  if (owners !== undefined) {
-    name = owners.get(ownerAddress);
-  }
-
-  if (name === undefined) {
-    return listHotspots().get(hotspotAddress);
-  }
-
-  return name;
-}
-
 const fetchEverything = async function () {
   // abort if HOTSPOT_OWNERS is not set (see .env)
-  if (listOwners() === undefined && listHotspots() === undefined) {
+  if (listOwners() === undefined && listHotspots() === undefined && listValidators() === undefined) {
     log("helium-hotspots: HOTSPOTS and OWNERS are not set, please add some using the bot commands");
     return;
   }
@@ -92,28 +96,44 @@ const fetchEverything = async function () {
   // fetch hotspots for our owners
   // TODO make this execute in parallel
   let hotspots = [];
+  let validators = [];
 
   if (listOwners() !== undefined) {
     for (let owner of listOwners()) {
       let _hotspots = await fetchHotspotsForOwner(owner[0]);
       log(`Found ${_hotspots.length} hotspots for ${owner[0]} owned by ${owner[1]}`);
-      hotspots = hotspots.concat(_hotspots);
+      for (let hotspot of _hotspots) {
+        hotspot['displayName'] = owner[1];
+        hotspots.push(hotspot);
+      }
     }
   }
 
   if (listHotspots() !== undefined) {
     for (let hotspot of listHotspots()) {
       let _hotspot = await fetchHotspotDetails(hotspot[0]);
+      _hotspot['displayName'] = hotspot[1];
       hotspots.push(_hotspot);
     }
   }
 
+  if (listValidators() !== undefined) {
+    for (let validator of listValidators()) {
+      let _validator = await fetchTotalRewardsForValidator(validator[0]);
+      console.log("Loaded validator: ", _validator);
+      _validator['address'] = validator[0];
+      _validator['displayName'] = validator[1];
+      validators.push(_validator);
+    }
+  }
+  
   // hydrate with reward and activity data
   // TODO make this execute in parallel
   for (let hotspot of hotspots) {
     let rewards = await fetchRewardSumForHotspot(hotspot["address"], dateTimeParams());
-    // let rewards = {sum: 666};
-    if (rewards["sum"] == null) { rewards["sum"] = 0; }
+    if (rewards["sum"] == null) { 
+      rewards["sum"] = 0; 
+    }
     hotspot["rewards_24h"] = (parseInt(rewards["sum"]) / 100000000);
   }
 
@@ -128,16 +148,27 @@ const fetchEverything = async function () {
   let output = "";
   output += "```ml\n";
 
+  if (validators.length > 0 && hotspots.length > 0) {
+    output += "\nVALIDATORS\n";
+  }
+
+  for (let i = 0; i < validators.length; i++) {
+    const hnt = validators[i]["total"].toFixed(2);
+    output += `${hnt.toString().padEnd(7)}${validators[i]["displayName"]}\n`;
+  }
+
   let sum = 0;
+  if (validators.length > 0 && hotspots.length > 0) {
+    output += "\nHOTSPOTS\n";
+  }
+
   for (let i = 0; i < hotspots.length; i++) {
     const hotspot = hotspots[i];
     const hnt = hotspot["rewards_24h"].toFixed(2);
     sum += parseFloat(hnt);
-    const ownerName = getNameForAddress(hotspot["owner"], hotspot["address"]);
     const blocksBehind = hotspot['block'] - hotspot['last_change_block'];
 
-    output += `${hnt.toString().padEnd(7)} ${hotspot["name"].padEnd(29)} @${ownerName.padEnd(10)} ${blocksBehind >= parseInt(process.env.BLOCK_WARNING_THRESHOLD) ? blocksBehind + " behind" : ""}\n`;
-      // `[x](https://explorer.helium.com/address/${hotspot["address"]}`
+    output += `${hnt.toString().padEnd(7)}${hotspot["name"].toString().padEnd(30)}@${hotspot["displayName"].toString().padEnd(11)}${blocksBehind >= parseInt(process.env.BLOCK_WARNING_THRESHOLD) ? blocksBehind + " behind" : ""}\n`;
   }
 
   if (process.env.SHOW_TOTAL == '1' && hotspots.length > 1) {
