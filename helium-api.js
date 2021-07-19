@@ -86,9 +86,41 @@ const listHotspots = function () {
   return new Map(hotspots.map(x => [x['address'], x['name']] ));
 };
 
-const fetchEverything = async function () {
+const getValidatorStats = async function () {
+  if (listValidators() === undefined) {
+    log("getValidatorStats: VALIDATORS are not set, please add some using the bot commands (see helium help)");
+    return;
+  }
+
+  let validators = [];
+
+  if (listValidators() !== undefined) {
+    for (let validator of listValidators()) {
+      let _validator = await fetchTotalRewardsForValidator(validator[0]);
+      console.log("Loaded validator: ", _validator);
+      _validator['address'] = validator[0];
+      _validator['displayName'] = validator[1];
+      validators.push(_validator);
+    }
+  }
+
+  // build output
+  let output = "";
+  output += "```ml\n";
+  output += "VALIDATORS\n";
+
+  for (let i = 0; i < validators.length; i++) {
+    const hnt = validators[i]["total"].toFixed(2);
+    output += `${hnt.toString().padEnd(7)}${validators[i]["displayName"]}\n`;
+  }
+
+  output += "```\n";
+  return output;
+}
+
+const getHotspotStats = async function () {
   // abort if HOTSPOT_OWNERS is not set (see .env)
-  if (listOwners() === undefined && listHotspots() === undefined && listValidators() === undefined) {
+  if (listOwners() === undefined && listHotspots() === undefined) {
     log("helium-hotspots: HOTSPOTS and OWNERS are not set, please add some using the bot commands");
     return;
   }
@@ -96,7 +128,6 @@ const fetchEverything = async function () {
   // fetch hotspots for our owners
   // TODO make this execute in parallel
   let hotspots = [];
-  let validators = [];
 
   if (listOwners() !== undefined) {
     for (let owner of listOwners()) {
@@ -117,16 +148,6 @@ const fetchEverything = async function () {
     }
   }
 
-  if (listValidators() !== undefined) {
-    for (let validator of listValidators()) {
-      let _validator = await fetchTotalRewardsForValidator(validator[0]);
-      console.log("Loaded validator: ", _validator);
-      _validator['address'] = validator[0];
-      _validator['displayName'] = validator[1];
-      validators.push(_validator);
-    }
-  }
-  
   // hydrate with reward and activity data
   // TODO make this execute in parallel
   for (let hotspot of hotspots) {
@@ -148,19 +169,7 @@ const fetchEverything = async function () {
   let output = "";
   output += "```ml\n";
 
-  if (validators.length > 0 && hotspots.length > 0) {
-    output += "\nVALIDATORS\n";
-  }
-
-  for (let i = 0; i < validators.length; i++) {
-    const hnt = validators[i]["total"].toFixed(2);
-    output += `${hnt.toString().padEnd(7)}${validators[i]["displayName"]}\n`;
-  }
-
   let sum = 0;
-  if (validators.length > 0 && hotspots.length > 0) {
-    output += "\nHOTSPOTS\n";
-  }
 
   for (let i = 0; i < hotspots.length; i++) {
     const hotspot = hotspots[i];
@@ -182,5 +191,6 @@ const fetchEverything = async function () {
 
 
 module.exports = {
-  fetchEverything,
+  getHotspotStats: getHotspotStats,
+  getValidatorStats: getValidatorStats
 };

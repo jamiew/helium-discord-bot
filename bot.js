@@ -17,33 +17,48 @@ client.on('message', async message => {
   let command = args.slice(0, 2).join(" ").toLowerCase();
 
   switch (command) {
+    case 'helium help':
     case 'hotspot help':
       output = "```sh\n";
-      output += "hotspot stats\n"
-      output += "hotspot config\n"
+      output += "HOTSPOT COMMANDS\n"
+      output += "helium config\n"
+      output += "\nhotspot stats\n"
       output += "hotspot add $address $name\n"
       output += "hotspot remove $address\n"
-      output += "owner add $address $name\n"
+      output += "\nowner add $address $name\n"
       output += "owner remove $address\n"
+      output += "\nvalidator stats\n"
       output += "validator add $address $name\n"
       output += "validator remove $address\n"
       output += "\n```";
       await message.channel.send(output);
       break;
 
-    case 'hotspot stats':
-    case 'hotspot stat':
     case 'validator stats':
+    case 'validator stat':
       await message.react("✨");
-      output = await HeliumAPI.fetchEverything();
+      output = await HeliumAPI.getValidatorStats();
       if (output !== undefined) {
         await message.channel.send(output);
       }
       else {
-        await message.channel.send("No hotspots/owners have been added yet. `hotspot help` to see how.")
+        await message.channel.send("No validators have been added yet. `helium help` to see how.")
       }
       break;
 
+    case 'hotspot stats':
+    case 'hotspot stat':
+      await message.react("✨");
+      output = await HeliumAPI.getHotspotStats();
+      if (output !== undefined) {
+        await message.channel.send(output);
+      }
+      else {
+        await message.channel.send("No hotspots/owners have been added yet. `helium help` to see how.")
+      }
+      break;
+
+    case 'helium config':
     case 'hotspot config':
       output = "```ml\n";
       
