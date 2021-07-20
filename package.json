@@ -9,12 +9,16 @@
   "dependencies": {
     "discord.js": "^12.4.1",
     "dotenv": "^8.2.0",
+    "forever": "^4.0.1",
+    "lowdb": "^1.0.0",
     "request": "^2.88.2",
-    "request-promise-native": "^1.0.9"
+    "request-promise-native": "^1.0.9",
+    "yarn": "^1.22.10"
   },
   "scripts": {
     "start": "node bot.js",
     "test": "node test.js",
+    "forever": "./server.sh",
     "watch": "watchexec -r -e js -- yarn start"
   },
   "engines": {
