@@ -192,8 +192,8 @@ const getHotspotStats = async function () {
     console.log(hotspot["name"], { ownerName, rewardScale, onlineStatus, listenAddrs, relayed });
 
     output += `${hnt.toString().padEnd(6)} ${hotspot["name"].padEnd(24)}`;
-    output += ownerName ? `@${ownerName.padEnd(10)}` : "n/a".padEnd(10);
-    output += ` [${rewardScale.toFixed(2)}]`;
+    output += (ownerName ? `@${ownerName}` : "n/a").padEnd(10);
+    output += `[${rewardScale.toFixed(2)}]`;
     if(relayed) {
       output += " [r]"
     }
