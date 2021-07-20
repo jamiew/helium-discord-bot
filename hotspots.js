@@ -135,9 +135,26 @@ const fetchEverything = async function () {
     sum += parseFloat(hnt);
     const ownerName = getNameForAddress(hotspot["owner"], hotspot["address"]);
     const blocksBehind = hotspot['block'] - hotspot['last_change_block'];
+    const rewardScale = hotspot['reward_scale'];
+    const onlineStatus = hotspot['status']['online'];
+    const listenAddrs = hotspot['status']['listen_addrs'];
+    const relayed = listenAddrs && !!listenAddrs.filter((addr) => { addr.match(/p2p-circuit/) });
+    console.log(hotspot["name"], { rewardScale, onlineStatus, listenAddrs, relayed });
 
-    output += `${hnt.toString().padEnd(7)} ${hotspot["name"].padEnd(29)} @${ownerName.padEnd(10)} ${blocksBehind >= parseInt(process.env.BLOCK_WARNING_THRESHOLD) ? blocksBehind + " behind" : ""}\n`;
-      // `[x](https://explorer.helium.com/address/${hotspot["address"]}`
+    output += `${hnt.toString().padEnd(6)} ${hotspot["name"].padEnd(24)}`;
+    output += ownerName ? `@${ownerName.padEnd(10)}` : "n/a".padEnd(10);
+    if(relayed) {
+      output += " [r]"
+    }
+    if (onlineStatus == 'offline') {
+      output += "[offline]";
+    }
+    if (onlineStatus == 'online' && blocksBehind >= parseInt(process.env.BLOCK_WARNING_THRESHOLD)) {
+      output += " " + blocksBehind + " behind";
+    }
+    output += ` [${rewardScale.toFixed(2)}]`;
+    output += "\n";
+    // `[x](https://explorer.helium.com/address/${hotspot["address"]}`
   }
 
   if (process.env.SHOW_TOTAL == '1' && hotspots.length > 1) {
