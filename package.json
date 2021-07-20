@@ -14,7 +14,8 @@
   },
   "scripts": {
     "start": "node bot.js",
-    "test": "node test.js"
+    "test": "node test.js",
+    "watch": "watchexec -r -e js -- yarn start"
   },
   "engines": {
     "node": "14"
