@@ -105,7 +105,7 @@ const getValidatorStats = async function () {
     console.log("Loaded validator: ", _validator, details);
     _validator['address'] = validator[0];
     _validator['displayName'] = validator[1] || details['name'];
-    _validator['penalty'] = details['penalty'];
+    _validator['penalty'] = `[${details['penalty']}]`;
     validators.push(_validator);
   }
 
@@ -193,6 +193,7 @@ const getHotspotStats = async function () {
 
     output += `${hnt.toString().padEnd(6)} ${hotspot["name"].padEnd(24)}`;
     output += ownerName ? `@${ownerName.padEnd(10)}` : "n/a".padEnd(10);
+    output += ` [${rewardScale.toFixed(2)}]`;
     if(relayed) {
       output += " [r]"
     }
@@ -202,7 +203,6 @@ const getHotspotStats = async function () {
     if (onlineStatus == 'online' && blocksBehind >= parseInt(process.env.BLOCK_WARNING_THRESHOLD)) {
       output += " " + blocksBehind + " behind";
     }
-    output += ` [${rewardScale.toFixed(2)}]`;
     output += "\n";
     // `[x](https://explorer.helium.com/address/${hotspot["address"]}`
   }
