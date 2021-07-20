@@ -191,7 +191,7 @@ const getHotspotStats = async function () {
     const relayed = listenAddrs && !!listenAddrs.filter((addr) => { addr.match(/p2p-circuit/) });
     console.log(hotspot["name"], { ownerName, rewardScale, onlineStatus, listenAddrs, relayed });
 
-    output += `${hnt.toString().padEnd(6)} ${hotspot["name"].padEnd(24)}`;
+    output += `${hnt.toString().padEnd(7)} ${hotspot["name"].padEnd(24)}`;
     output += (ownerName ? `@${ownerName}` : "n/a").padEnd(10);
     output += `[${rewardScale.toFixed(2)}]`;
     if(relayed) {
