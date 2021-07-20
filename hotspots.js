@@ -112,7 +112,6 @@ const fetchEverything = async function () {
   // TODO make this execute in parallel
   for (let hotspot of hotspots) {
     let rewards = await fetchRewardSumForHotspot(hotspot["address"], dateTimeParams());
-    // let rewards = {sum: 666};
     if (rewards["sum"] == null) { rewards["sum"] = 0; }
     hotspot["rewards_24h"] = (parseInt(rewards["sum"]) / 100000000);
   }
