@@ -36,6 +36,11 @@ const fetchHotspotDetails = async function (address) {
   return rsp.data;
 };
 
+const fetchValidatorDetails = async function (address) {
+  let rsp = await httpGet(`https://api.helium.io/v1/validators/${address}`);
+  return rsp.data;
+}
+
 const fetchTotalRewardsForValidator = async function (address) {
   let url = `https://api.helium.io/v1/validators/${address}/rewards/sum?min_time=2020-01-01&max_time=2050-01-01`;
   let rsp = await httpGet(url);
@@ -87,21 +92,21 @@ const listHotspots = function () {
 };
 
 const getValidatorStats = async function () {
-  if (listValidators() === undefined) {
-    log("getValidatorStats: VALIDATORS are not set, please add some using the bot commands (see helium help)");
-    return;
+  if (listValidators() === undefined || listValidators().size == 0) {
+    log("getValidatorStats: VALIDATORS are not set, please add some using the bot commands (see `helium help`)");
+    return undefined;
   }
 
-  let validators = [];
-
-  if (listValidators() !== undefined) {
-    for (let validator of listValidators()) {
-      let _validator = await fetchTotalRewardsForValidator(validator[0]);
-      console.log("Loaded validator: ", _validator);
-      _validator['address'] = validator[0];
-      _validator['displayName'] = validator[1];
-      validators.push(_validator);
-    }
+  const validators = [];
+  for (let validator of listValidators()) {
+    let _validator = await fetchTotalRewardsForValidator(validator[0]);
+    const details = await fetchValidatorDetails(validator[0]);
+    console.log({ details });
+    console.log("Loaded validator: ", _validator, details);
+    _validator['address'] = validator[0];
+    _validator['displayName'] = validator[1] || details['name'];
+    _validator['penalty'] = details['penalty'];
+    validators.push(_validator);
   }
 
   // build output
@@ -111,7 +116,9 @@ const getValidatorStats = async function () {
 
   for (let i = 0; i < validators.length; i++) {
     const hnt = validators[i]["total"].toFixed(2);
-    output += `${hnt.toString().padEnd(7)}${validators[i]["displayName"]}\n`;
+    output += `${hnt.toString().padEnd(7)}${validators[i]["displayName"].padEnd(20)}`;
+    output += `${validators[i]['penalty'].toFixed(2)}`
+    output += "\n";
   }
 
   output += "```\n";
