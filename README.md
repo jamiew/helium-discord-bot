@@ -17,6 +17,23 @@ And the bot will output rolling 24 hour stats for the configured hotspots:
 0.20  frothing-red-weasel        @rach
 ```
 
+Similarly you can now also track [validators](https://www.helium.com/stake):
+
+```
+validator stats
+```
+
+Output is total HNT rewards for each validator:
+
+```
+VALIDATORS
+34.55  gigantic-onyx-raven
+141.42 innocent-cherry-yak
+72.31  cold-ultraviolet-alligator
+21.95  scrawny-cobalt-raven
+```
+
+
 
 ## Setup
 
@@ -65,7 +82,7 @@ You can chat with the bot to add Helium addresses you want to show up.
 Write `hotspot help` to see all the commands for managing owners/hotspots
 
 ```sh
-hotspot stats # or validator stats
+hotspot stats
 hotspot config
 
 hotspot add $address $name
@@ -73,9 +90,6 @@ hotspot remove $address
 
 owner add $address $name
 owner remove $address
-
-validator add $address $name
-validator remove $address
 ```
 
 So to add [Immense Shamrock Whale](https://explorer.helium.com/hotspots/112gxJkVqJF3REaJekpjmassJGiSs2jMu9GqtnZGDbd4n6xFfvws) owned by user `your_name`:
