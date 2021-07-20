@@ -64,13 +64,18 @@ You can chat with the bot to add Helium addresses you want to show up.
 
 Write `hotspot help` to see all the commands for managing owners/hotspots
 
-```
-hotspot stats
+```sh
+hotspot stats # or validator stats
 hotspot config
-hotspot add {address} {name}
-hotspot remove {address}
-owner add {address} {name}
-owner remove {address}
+
+hotspot add $address $name
+hotspot remove $address
+
+owner add $address $name
+owner remove $address
+
+validator add $address $name
+validator remove $address
 ```
 
 So to add [Immense Shamrock Whale](https://explorer.helium.com/hotspots/112gxJkVqJF3REaJekpjmassJGiSs2jMu9GqtnZGDbd4n6xFfvws) owned by user `your_name`:

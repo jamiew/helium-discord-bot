@@ -1,9 +1,10 @@
 require('dotenv').config();
 
-const Hotspots = require('./hotspots');
-const Config = require('./config');
+const HeliumAPI = require('./helium-api');
+const DB = require('./db');
 
 const Discord = require('discord.js');
+const { debug } = require('request-promise-native');
 const client = new Discord.Client();
 
 client.on('ready', () => {
@@ -16,41 +17,70 @@ client.on('message', async message => {
   let command = args.slice(0, 2).join(" ").toLowerCase();
 
   switch (command) {
+    case 'helium help':
     case 'hotspot help':
-      output = "```\n";
-      output += "hotspot stats\n"
-      output += "hotspot config\n"
-      output += "hotspot add {address} {name}\n"
-      output += "hotspot remove {address}\n"
-      output += "owner add {address} {name}\n"
-      output += "owner remove {address}\n"
+      output = "```sh\n";
+      output += "HOTSPOT COMMANDS\n"
+      output += "helium config\n"
+      output += "\nhotspot stats\n"
+      output += "hotspot add $address $name\n"
+      output += "hotspot remove $address\n"
+      output += "\nowner add $address $name\n"
+      output += "owner remove $address\n"
+      output += "\nvalidator stats\n"
+      output += "validator add $address $name\n"
+      output += "validator remove $address\n"
       output += "\n```";
       await message.channel.send(output);
       break;
 
-    case 'hotspot stats':
-    case 'hotspot stat':
-      await message.channel.send("✨ Checking the blockchain, stand by...");
-      output = await Hotspots.fetchEverything();
+    case 'validator stats':
+    case 'validator stat':
+      await message.react("✨");
+      output = await HeliumAPI.getValidatorStats();
       if (output !== undefined) {
         await message.channel.send(output);
       }
       else {
-        await message.channel.send("No hotspots/owners have been added yet. `hotspot help` to see how.")
+        await message.channel.send("No validators have been added yet. `helium help` to see how.")
       }
       break;
 
+    case 'hotspot stats':
+    case 'hotspot stat':
+      await message.react("✨");
+      output = await HeliumAPI.getHotspotStats();
+      if (output !== undefined) {
+        await message.channel.send(output);
+      }
+      else {
+        await message.channel.send("No hotspots/owners have been added yet. `helium help` to see how.")
+      }
+      break;
+
+    case 'helium config':
     case 'hotspot config':
       output = "```ml\n";
-      output += 'OWNERS\n';
-      if(Config.getOwners().length == 0){ output += "None\n"; }
-      Config.getOwners().forEach(owner => {
-        output += `${owner['name']} > ${owner['address']}\n`
-      });
+      
+      if (DB.getOwners().length > 0) {
+        output += 'VALIDATORS\n';
+        DB.getValidators().forEach(v => {
+          output += `${v['name']} > ${v['address']}\n`
+        });
+        output += "\n";
+      }
 
-      output += '\nHOTSPOTS\n';
-      if(Config.getHotspots().length == 0){ output += "None\n"; }
-      Config.getHotspots().forEach(hotspot => {
+      if (DB.getOwners().length > 0) {
+        output += 'OWNERS\n';
+        DB.getOwners().forEach(owner => {
+          output += `${owner['name']} > ${owner['address']}\n`
+        });
+        output += "\n";
+      }
+
+      output += 'HOTSPOTS\n';
+      if (DB.getHotspots().length == 0) { output += "None\n"; }
+      DB.getHotspots().forEach(hotspot => {
         output += `${hotspot['name']} > ${hotspot['address']}\n`
       });
 
@@ -59,23 +89,33 @@ client.on('message', async message => {
       break;
 
     case 'hotspot add':
-      await Config.addHotspotAddress(args[2], args[3]);
-      await message.channel.send("Hotspot added!");
+      await DB.addHotspotAddress(args[2], args[3]);
+      await message.react("👍");;
       break;
 
     case 'hotspot remove':
-      await Config.removeHotspotAddress(args[2]);
-      await message.channel.send("Hotspot removed!");
+      await DB.removeHotspotAddress(args[2]);
+      await message.react("👍");
       break;
 
     case 'owner add':
-      await Config.addOwnerAddress(args[2], args[3]);
-      await message.channel.send("Owner added!");
+      await DB.addOwnerAddress(args[2], args[3]);
+      await message.react("👍");
       break;
 
     case 'owner remove':
-      await Config.removeOwnerAddress(args[2]);
-      await message.channel.send("Owner removed!");
+      await DB.removeOwnerAddress(args[2]);
+      await message.react("👍");
+      break;
+      
+    case 'validator add':
+      await DB.addValidator(args[2], args[3]);
+      await message.react("👍");
+      break;
+
+    case 'validator remove':
+      await DB.removeValidator(args[2]);
+      await message.react("👍");
       break;
   }
 
