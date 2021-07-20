@@ -4,8 +4,9 @@
 require("dotenv").config();
 
 (async () => {
-  const hotspots = require("./hotspots.js");
-  let output = await hotspots.fetchEverything();
+  const HeliumAPI = require('./helium-api');
+  // TODO load some fake config
+  const output = await HeliumAPI.getHotspotStats();
   console.log("\nOutput:\n");
   console.log(output);
 })();
