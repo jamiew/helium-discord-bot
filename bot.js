@@ -36,32 +36,40 @@ client.on('message', async message => {
 
     case 'validator stats':
     case 'validator stat':
-      await message.react("✨");
-      output = await HeliumAPI.getValidatorStats();
-      if (output !== undefined) {
-        await message.channel.send(output);
-      }
-      else {
-        await message.channel.send("No validators have been added yet. `helium help` to see how.")
+      try {
+        await message.react("✨");
+        output = await HeliumAPI.getValidatorStats();
+        if (output !== undefined) {
+          await message.channel.send(output);
+        }
+        else {
+          await message.channel.send("No validators have been added. `helium help` to see how.")
+        }
+      } catch (error) {
+        await message.channel.send(`Error: ${error}`)
       }
       break;
 
     case 'hotspot stats':
     case 'hotspot stat':
-      await message.react("✨");
-      output = await HeliumAPI.getHotspotStats();
-      if (output !== undefined) {
-        await message.channel.send(output);
-      }
-      else {
-        await message.channel.send("No hotspots/owners have been added yet. `helium help` to see how.")
+      try {
+        await message.react("✨");
+        output = await HeliumAPI.getHotspotStats();
+        if (output !== undefined) {
+          await message.channel.send(output);
+        }
+        else {
+          await message.channel.send("No hotspots or owners have been added. `helium help` to see how.")
+        }
+      } catch (error) {
+        await message.channel.send(`Error: ${error}`)
       }
       break;
 
     case 'helium config':
     case 'hotspot config':
       output = "```ml\n";
-      
+
       if (DB.getOwners().length > 0) {
         output += 'VALIDATORS\n';
         DB.getValidators().forEach(v => {
@@ -107,7 +115,7 @@ client.on('message', async message => {
       await DB.removeOwnerAddress(args[2]);
       await message.react("👍");
       break;
-      
+
     case 'validator add':
       await DB.addValidator(args[2], args[3]);
       await message.react("👍");

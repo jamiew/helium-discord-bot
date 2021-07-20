@@ -18,7 +18,8 @@
   "scripts": {
     "start": "node bot.js",
     "test": "node test.js",
-    "forever": "./server.sh"
+    "forever": "./server.sh",
+    "watch": "watchexec -r -e js -- yarn start"
   },
   "engines": {
     "node": "14"

@@ -152,8 +152,8 @@ const getHotspotStats = async function () {
   // TODO make this execute in parallel
   for (let hotspot of hotspots) {
     let rewards = await fetchRewardSumForHotspot(hotspot["address"], dateTimeParams());
-    if (rewards["sum"] == null) { 
-      rewards["sum"] = 0; 
+    if (rewards["sum"] == null) {
+      rewards["sum"] = 0;
     }
     hotspot["rewards_24h"] = (parseInt(rewards["sum"]) / 100000000);
   }
@@ -175,9 +175,29 @@ const getHotspotStats = async function () {
     const hotspot = hotspots[i];
     const hnt = hotspot["rewards_24h"].toFixed(2);
     sum += parseFloat(hnt);
-    const blocksBehind = hotspot['block'] - hotspot['last_change_block'];
 
-    output += `${hnt.toString().padEnd(7)}${hotspot["name"].toString().padEnd(30)}@${hotspot["displayName"].toString().padEnd(11)}${blocksBehind >= parseInt(process.env.BLOCK_WARNING_THRESHOLD) ? blocksBehind + " behind" : ""}\n`;
+    const ownerName = hotspot["displayName"] && hotspot["displayName"].toString();
+    const blocksBehind = hotspot['block'] - hotspot['last_change_block'];
+    const rewardScale = hotspot['reward_scale'];
+    const onlineStatus = hotspot['status']['online'];
+    const listenAddrs = hotspot['status']['listen_addrs'];
+    const relayed = listenAddrs && !!listenAddrs.filter((addr) => { addr.match(/p2p-circuit/) });
+    console.log(hotspot["name"], { ownerName, rewardScale, onlineStatus, listenAddrs, relayed });
+
+    output += `${hnt.toString().padEnd(6)} ${hotspot["name"].padEnd(24)}`;
+    output += ownerName ? `@${ownerName.padEnd(10)}` : "n/a".padEnd(10);
+    if(relayed) {
+      output += " [r]"
+    }
+    if (onlineStatus == 'offline') {
+      output += "[offline]";
+    }
+    if (onlineStatus == 'online' && blocksBehind >= parseInt(process.env.BLOCK_WARNING_THRESHOLD)) {
+      output += " " + blocksBehind + " behind";
+    }
+    output += ` [${rewardScale.toFixed(2)}]`;
+    output += "\n";
+    // `[x](https://explorer.helium.com/address/${hotspot["address"]}`
   }
 
   if (process.env.SHOW_TOTAL == '1' && hotspots.length > 1) {
