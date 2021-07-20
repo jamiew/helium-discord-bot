@@ -175,12 +175,14 @@ const getHotspotStats = async function () {
     const hotspot = hotspots[i];
     const hnt = hotspot["rewards_24h"].toFixed(2);
     sum += parseFloat(hnt);
+
+    const ownerName = hotspot["displayName"] && hotspot["displayName"].toString();
     const blocksBehind = hotspot['block'] - hotspot['last_change_block'];
     const rewardScale = hotspot['reward_scale'];
     const onlineStatus = hotspot['status']['online'];
     const listenAddrs = hotspot['status']['listen_addrs'];
     const relayed = listenAddrs && !!listenAddrs.filter((addr) => { addr.match(/p2p-circuit/) });
-    console.log(hotspot["name"], { rewardScale, onlineStatus, listenAddrs, relayed });
+    console.log(hotspot["name"], { ownerName, rewardScale, onlineStatus, listenAddrs, relayed });
 
     output += `${hnt.toString().padEnd(6)} ${hotspot["name"].padEnd(24)}`;
     output += ownerName ? `@${ownerName.padEnd(10)}` : "n/a".padEnd(10);
