@@ -105,7 +105,7 @@ const getValidatorStats = async function () {
     console.log("Loaded validator: ", _validator, details);
     _validator['address'] = validator[0];
     _validator['displayName'] = validator[1] || details['name'];
-    _validator['penalty'] = `[${details['penalty']}]`;
+    _validator['penalty'] = details['penalty'];
     validators.push(_validator);
   }
 
@@ -117,7 +117,7 @@ const getValidatorStats = async function () {
   for (let i = 0; i < validators.length; i++) {
     const hnt = validators[i]["total"].toFixed(2);
     output += `${hnt.toString().padEnd(7)}${validators[i]["displayName"].padEnd(20)}`;
-    output += `${validators[i]['penalty'].toFixed(2)}`
+    output += `[${validators[i]['penalty'].toFixed(2)}]`
     output += "\n";
   }
 
@@ -198,7 +198,7 @@ const getHotspotStats = async function () {
       output += " [r]"
     }
     if (onlineStatus == 'offline') {
-      output += "[offline]";
+      output += " [offline]";
     }
     if (onlineStatus == 'online' && blocksBehind >= parseInt(process.env.BLOCK_WARNING_THRESHOLD)) {
       output += " " + blocksBehind + " behind";
