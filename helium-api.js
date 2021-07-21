@@ -193,7 +193,7 @@ const getHotspotStats = async function () {
 
     output += `${hnt.toString().padEnd(7)} ${hotspot["name"].padEnd(24)}`;
     output += (ownerName ? `@${ownerName}` : "n/a").padEnd(10);
-    output += `[${rewardScale.toFixed(2)}]`;
+    output += `[${rewardScale && rewardScale.toFixed(2) || 'null'}]`;
     if(relayed) {
       output += " [r]"
     }
