@@ -116,7 +116,7 @@ const getValidatorStats = async function () {
 
   for (let i = 0; i < validators.length; i++) {
     const hnt = validators[i]["total"].toFixed(2);
-    output += `${hnt.toString().padEnd(7)}${validators[i]["displayName"].padEnd(20)}`;
+    output += `${hnt.toString().padEnd(7)}${validators[i]["displayName"].padEnd(24)}`;
     output += `[${validators[i]['penalty'].toFixed(2)}]`
     output += "\n";
   }
@@ -191,7 +191,7 @@ const getHotspotStats = async function () {
     const relayed = listenAddrs && !!listenAddrs.filter((addr) => { addr.match(/p2p-circuit/) });
     console.log(hotspot["name"], { ownerName, rewardScale, onlineStatus, listenAddrs, relayed });
 
-    output += `${hnt.toString().padEnd(7)} ${hotspot["name"].padEnd(24)}`;
+    output += `${hnt.toString().padEnd(7)}${hotspot["name"].padEnd(24)}`;
     output += (ownerName ? `@${ownerName}` : "n/a").padEnd(10);
     output += `[${rewardScale && rewardScale.toFixed(2) || 'null'}]`;
     if(relayed) {
