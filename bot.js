@@ -46,7 +46,8 @@ client.on('message', async message => {
           await message.channel.send("No validators have been added. Type `helium help` to see how.")
         }
       } catch (error) {
-        await message.channel.send(`Error: ${error}`)
+        await message.channel.send(`Error: ${error}`);
+        throw error;
       }
       break;
 
@@ -62,7 +63,8 @@ client.on('message', async message => {
           await message.channel.send("No hotspots or owners have been added. Type `helium help` to see how.")
         }
       } catch (error) {
-        await message.channel.send(`Error: ${error}`)
+        await message.channel.send(`Error: ${error}`);
+        throw error;
       }
       break;
 
