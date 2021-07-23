@@ -180,7 +180,7 @@ const getHotspotStats = async function () {
 
   // paddings between columns
   // TODO share between validator and hotspot output
-  const paddings = [7, 30, 14, 6];
+  const paddings = [7, 30, 14, 8];
 
   // headers disabled due to 2k char message limit
   // this gets us over the line
