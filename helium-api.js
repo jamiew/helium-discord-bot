@@ -201,7 +201,8 @@ const getHotspotStats = async function () {
     const rewardScale = hotspot['reward_scale'];
     const onlineStatus = hotspot['status']['online'];
     const listenAddrs = hotspot['status']['listen_addrs'];
-    const relayed = listenAddrs && !!listenAddrs.filter((addr) => { addr.match(/p2p-circuit/) });
+    console.log(listenAddrs)
+    const relayed = listenAddrs && !!listenAddrs.filter((addr) => { addr.match(/p2p-circuit/) }).length > 0;
     console.log(hotspot["name"], { ownerName, rewardScale, onlineStatus, listenAddrs, relayed });
 
     output += `${hnt.toString().padEnd(paddings[0])}${hotspot["name"].padEnd(paddings[1])}`;
