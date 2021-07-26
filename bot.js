@@ -4,7 +4,6 @@ const HeliumAPI = require('./helium-api');
 const DB = require('./db');
 
 const Discord = require('discord.js');
-const { debug } = require('request-promise-native');
 const client = new Discord.Client();
 
 client.on('ready', () => {
