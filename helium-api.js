@@ -1,7 +1,3 @@
-// helium-hotspots plugin
-// Print daily rewards amounts for your Helium Hotspots
-// #antennalife
-
 const request = require("request-promise-native");
 const DB = require('./db');
 
