@@ -11,14 +11,14 @@ client.on('ready', () => {
 });
 
 client.on('message', async message => {
-  let output = "";
-  let args = message.content.split(" ");
-  let command = args.slice(0, 2).join(" ").toLowerCase();
+  const args = message.content.split(" ");
+  const command = args.slice(0, 2).join(" ").toLowerCase();
+  let output = null;
 
   switch (command) {
     case 'helium help':
     case 'hotspot help':
-      const output = formatHelp();
+      output = formatHelp();
       await message.channel.send(output);
       break;
 
@@ -28,7 +28,7 @@ client.on('message', async message => {
         await message.react("✨");
         const validators = await HeliumAPI.getValidatorStats();
         if (validators !== undefined) {
-          const output = formatValidatorStats(validators);
+          output = formatValidatorStats(validators);
           await message.channel.send(output);
         }
         else {
@@ -46,7 +46,7 @@ client.on('message', async message => {
         await message.react("✨");
         hotspots = await HeliumAPI.getHotspotStats();
         if (hotspots !== undefined) {
-          const output = formatHotspotStats(hotspots);
+          output = formatHotspotStats(hotspots);
           await message.channel.send(output);
         }
         else {
@@ -60,7 +60,7 @@ client.on('message', async message => {
 
     case 'helium config':
     case 'hotspot config':
-      const output = formatConfig();
+      output = formatConfig();
       await message.channel.send(output);
       break;
 
@@ -97,19 +97,20 @@ client.on('message', async message => {
 
 });
 
+// define specific paddings between columns
+// currently shared b/w both hotspot & validator stats,
+// but could just dynamically adjust based on output
+const columnPaddings = [8, 30, 14, 8];
+
 function formatHotspotStats(hotspots) {
   let sum = 0;
   let output = "";
   output += "```ml\n";
 
-  // paddings between columns
-  // TODO share between validator and hotspot output
-  const paddings = [7, 30, 14, 8];
-
   // headers
-  output += "HNT".padEnd(paddings[0]);
-  output += "HOTSPOT".padEnd(paddings[1]);
-  output += "NAME".padEnd(paddings[4]);
+  output += "HNT".padEnd(columnPaddings[0]);
+  output += "HOTSPOT".padEnd(columnPaddings[1]);
+  output += "NAME".padEnd(columnPaddings[4]);
   output += "STATUS";
   output += "\n";
 
@@ -127,13 +128,13 @@ function formatHotspotStats(hotspots) {
     const relayed = listenAddrs && !!listenAddrs.filter((addr) => { addr.match(/p2p-circuit/) }).length > 0;
     console.log(hotspot["name"], { ownerName, rewardScale, onlineStatus, listenAddrs, relayed });
 
-    output += `${hnt.toString().padEnd(paddings[0])}${hotspot["name"].padEnd(paddings[1])}`;
-    output += (ownerName ? `@${ownerName}` : "n/a").padEnd(paddings[2]);
+    output += `${hnt.toString().padEnd(columnPaddings[0])}${hotspot["name"].padEnd(columnPaddings[1])}`;
+    output += (ownerName ? `@${ownerName}` : "n/a").padEnd(columnPaddings[2]);
     if (onlineStatus == 'offline') {
       output += "OFFLINE";
     }
     else if (onlineStatus == 'online') {
-      output += `${rewardScale && rewardScale.toFixed(2) || '0'}${!!relayed && 'R' || ''}`.padEnd(paddings[3]);
+      output += `${rewardScale && rewardScale.toFixed(2) || '0'}${!!relayed && 'R' || ''}`.padEnd(columnPaddings[3]);
       if (blocksBehind >= parseInt(process.env.BLOCK_WARNING_THRESHOLD)) {
         output += " " + blocksBehind + " behind";
       }
@@ -159,7 +160,7 @@ function formatValidatorStats(validators) {
 
   for (let i = 0; i < validators.length; i++) {
     const hnt = validators[i]["total"].toFixed(2);
-    output += `${hnt.toString().padEnd(7)}${validators[i]["displayName"].padEnd(24)}`;
+    output += `${hnt.toString().padEnd(columnPaddings[0])}${validators[i]["displayName"].padEnd(columnPaddings[1])}`;
     output += `[${validators[i]['penalty'].toFixed(2)}]`
     output += "\n";
   }
@@ -198,7 +199,7 @@ function formatConfig() {
 }
 
 function formatHelp() {
-  output = "```sh\n";
+  let output = "```sh\n";
   output += "HOTSPOT COMMANDS\n"
   output += "helium config\n"
   output += "\nhotspot stats\n"
@@ -213,8 +214,19 @@ function formatHelp() {
   return output;
 }
 
+module.exports = {
+  formatHotspotStats,
+  formatValidatorStats,
+  formatConfig,
+  formatHelp,
+}
 
-console.log(`Hotspot bot starting...`);
-console.log(`To add it to your server, visit:`);
-console.log(`https://discord.com/oauth2/authorize?client_id=${process.env.DISCORD_CLIENT_ID}&scope=bot&permissions=1024`);
-client.login(process.env.DISCORD_TOKEN);
+if(!!process.env.TEST) {
+  console.info("Test mode, not logging in");
+}
+else {
+  console.log(`Hotspot bot starting...`);
+  console.log(`To add it to your server, visit:`);
+  console.log(`https://discord.com/oauth2/authorize?client_id=${process.env.DISCORD_CLIENT_ID}&scope=bot&permissions=1024`);
+  client.login(process.env.DISCORD_TOKEN);
+}
