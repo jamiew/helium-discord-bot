@@ -108,21 +108,6 @@ const getValidatorStats = async function () {
     _validator['penalty'] = details['penalty'];
     validators.push(_validator);
   }
-
-  // build output
-  let output = "";
-  output += "```ml\n";
-  output += "VALIDATORS\n";
-
-  for (let i = 0; i < validators.length; i++) {
-    const hnt = validators[i]["total"].toFixed(2);
-    output += `${hnt.toString().padEnd(7)}${validators[i]["displayName"].padEnd(24)}`;
-    output += `[${validators[i]['penalty'].toFixed(2)}]`
-    output += "\n";
-  }
-
-  output += "```\n";
-  return output;
 }
 
 const getHotspotStats = async function () {
@@ -172,61 +157,7 @@ const getHotspotStats = async function () {
     return 0;
   });
 
-  // build output
-  // TODO this should be back in bot.js, nothing to do with API
-  let sum = 0;
-  let output = "";
-  output += "```ml\n";
-
-  // paddings between columns
-  // TODO share between validator and hotspot output
-  const paddings = [7, 30, 14, 8];
-
-  // headers disabled due to 2k char message limit
-  // this gets us over the line
-  // TODO echo back in multiple messages if really big (right?)
-  // output += "HNT".padEnd(paddings[0]);
-  // output += "HOTSPOT".padEnd(paddings[1]);
-  // output += "NAME".padEnd(paddings[4]);
-  // output += "STATUS";
-  // output += "\n";
-
-  for (let i = 0; i < hotspots.length; i++) {
-    const hotspot = hotspots[i];
-    const hnt = hotspot["rewards_24h"].toFixed(2);
-    sum += parseFloat(hnt);
-
-    const ownerName = hotspot["displayName"] && hotspot["displayName"].toString();
-    const blocksBehind = hotspot['block'] - hotspot['last_change_block'];
-    const rewardScale = hotspot['reward_scale'];
-    const onlineStatus = hotspot['status']['online'];
-    const listenAddrs = hotspot['status']['listen_addrs'];
-    console.log(listenAddrs)
-    const relayed = listenAddrs && !!listenAddrs.filter((addr) => { addr.match(/p2p-circuit/) }).length > 0;
-    console.log(hotspot["name"], { ownerName, rewardScale, onlineStatus, listenAddrs, relayed });
-
-    output += `${hnt.toString().padEnd(paddings[0])}${hotspot["name"].padEnd(paddings[1])}`;
-    output += (ownerName ? `@${ownerName}` : "n/a").padEnd(paddings[2]);
-    if (onlineStatus == 'offline') {
-      output += "OFFLINE";
-    }
-    else if (onlineStatus == 'online') {
-      output += `${rewardScale && rewardScale.toFixed(2) || '0'}${!!relayed && 'R' || ''}`.padEnd(paddings[3]);
-      if (blocksBehind >= parseInt(process.env.BLOCK_WARNING_THRESHOLD)) {
-        output += " " + blocksBehind + " behind";
-      }
-    }
-    output += "\n";
-    // `[x](https://explorer.helium.com/address/${hotspot["address"]}`
-  }
-
-  if (process.env.SHOW_TOTAL == '1' && hotspots.length > 1) {
-    output += `---------------------------------------------\n`
-    output += `${sum.toFixed(2)}\n`
-  }
-
-  output += "```\n";
-  return output;
+  return hotspots;
 };
 
 
