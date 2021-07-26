@@ -29,7 +29,7 @@ client.on('message', async message => {
         const validators = await HeliumAPI.getValidatorStats();
         if (validators !== undefined) {
           output = formatValidatorStats(validators);
-          await message.channel.send(output);
+          await sendStatsMessage(message, output);
         }
         else {
           await message.channel.send("No validators have been added. Type `helium help` to see how.")
@@ -47,7 +47,7 @@ client.on('message', async message => {
         hotspots = await HeliumAPI.getHotspotStats();
         if (hotspots !== undefined) {
           output = formatHotspotStats(hotspots);
-          await message.channel.send(output);
+          await sendStatsMessage(message, output);
         }
         else {
           await message.channel.send("No hotspots or owners have been added. Type `helium help` to see how.")
@@ -105,7 +105,6 @@ const columnPaddings = [8, 30, 14, 8];
 function formatHotspotStats(hotspots) {
   let sum = 0;
   let output = "";
-  output += "```ml\n";
 
   // headers
   output += "HNT".padEnd(columnPaddings[0]);
@@ -148,14 +147,12 @@ function formatHotspotStats(hotspots) {
     output += `${sum.toFixed(2)}\n`
   }
 
-  output += "```\n";
   return output;
 }
 
 function formatValidatorStats(validators) {
   // build output
   let output = "";
-  output += "```ml\n";
   output += "VALIDATORS\n";
 
   for (let i = 0; i < validators.length; i++) {
@@ -165,7 +162,6 @@ function formatValidatorStats(validators) {
     output += "\n";
   }
 
-  output += "```\n";
   return output;
 }
 
@@ -212,6 +208,32 @@ function formatHelp() {
   output += "validator remove $address\n"
   output += "\n```";
   return output;
+}
+
+// if necessary, split into 2k character chunks and send multiple messages
+function chunkifyString(str, maxSize) {
+  let chunks = [];
+  const lines = str.split(`\n`);
+  for(i = 0, cur = 0; i < lines.length; i++) {
+    if(chunks[cur] && (chunks[cur].length + lines[i].length) > maxSize) {
+      cur += 1;
+    }
+    if(!chunks[cur]) { chunks[cur] = ''; }
+    chunks[cur] += lines[i];
+    chunks[cur] += "\n";
+  }
+  return chunks;
+}
+
+async function sendStatsMessage(message, fullText) {
+  // 2k discord character max, we add ~10 characters, just fudge to 1900
+  const chunks = chunkifyString(fullText, 1900)
+  for(chunk of chunks) {
+    let output = "```ml\n";
+    output += chunk;
+    output += "```\n"
+    await message.channel.send(output);
+  }
 }
 
 module.exports = {
