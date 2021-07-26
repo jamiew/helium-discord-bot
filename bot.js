@@ -4,7 +4,6 @@ const HeliumAPI = require('./helium-api');
 const DB = require('./db');
 
 const Discord = require('discord.js');
-const { debug } = require('request-promise-native');
 const client = new Discord.Client();
 
 client.on('ready', () => {
@@ -12,25 +11,14 @@ client.on('ready', () => {
 });
 
 client.on('message', async message => {
-  let output = "";
-  let args = message.content.split(" ");
-  let command = args.slice(0, 2).join(" ").toLowerCase();
+  const args = message.content.split(" ");
+  const command = args.slice(0, 2).join(" ").toLowerCase();
+  let output = null;
 
   switch (command) {
     case 'helium help':
     case 'hotspot help':
-      output = "```sh\n";
-      output += "HOTSPOT COMMANDS\n"
-      output += "helium config\n"
-      output += "\nhotspot stats\n"
-      output += "hotspot add $address $name\n"
-      output += "hotspot remove $address\n"
-      output += "\nowner add $address $name\n"
-      output += "owner remove $address\n"
-      output += "\nvalidator stats\n"
-      output += "validator add $address $name\n"
-      output += "validator remove $address\n"
-      output += "\n```";
+      output = formatHelp();
       await message.channel.send(output);
       break;
 
@@ -38,8 +26,9 @@ client.on('message', async message => {
     case 'validator stat':
       try {
         await message.react("✨");
-        output = await HeliumAPI.getValidatorStats();
-        if (output !== undefined) {
+        const validators = await HeliumAPI.getValidatorStats();
+        if (validators !== undefined) {
+          output = formatValidatorStats(validators);
           await message.channel.send(output);
         }
         else {
@@ -55,8 +44,9 @@ client.on('message', async message => {
     case 'hotspot stat':
       try {
         await message.react("✨");
-        output = await HeliumAPI.getHotspotStats();
-        if (output !== undefined) {
+        hotspots = await HeliumAPI.getHotspotStats();
+        if (hotspots !== undefined) {
+          output = formatHotspotStats(hotspots);
           await message.channel.send(output);
         }
         else {
@@ -70,31 +60,7 @@ client.on('message', async message => {
 
     case 'helium config':
     case 'hotspot config':
-      output = "```ml\n";
-
-      if (DB.getOwners().length > 0) {
-        output += 'VALIDATORS\n';
-        DB.getValidators().forEach(v => {
-          output += `${v['name']} > ${v['address']}\n`
-        });
-        output += "\n";
-      }
-
-      if (DB.getOwners().length > 0) {
-        output += 'OWNERS\n';
-        DB.getOwners().forEach(owner => {
-          output += `${owner['name']} > ${owner['address']}\n`
-        });
-        output += "\n";
-      }
-
-      output += 'HOTSPOTS\n';
-      if (DB.getHotspots().length == 0) { output += "None\n"; }
-      DB.getHotspots().forEach(hotspot => {
-        output += `${hotspot['name']} > ${hotspot['address']}\n`
-      });
-
-      output += "\n```";
+      output = formatConfig();
       await message.channel.send(output);
       break;
 
@@ -131,7 +97,136 @@ client.on('message', async message => {
 
 });
 
-console.log(`Hotspot bot starting...`);
-console.log(`To add it to your server, visit:`);
-console.log(`https://discord.com/oauth2/authorize?client_id=${process.env.DISCORD_CLIENT_ID}&scope=bot&permissions=1024`);
-client.login(process.env.DISCORD_TOKEN);
+// define specific paddings between columns
+// currently shared b/w both hotspot & validator stats,
+// but could just dynamically adjust based on output
+const columnPaddings = [8, 30, 14, 8];
+
+function formatHotspotStats(hotspots) {
+  let sum = 0;
+  let output = "";
+  output += "```ml\n";
+
+  // headers
+  output += "HNT".padEnd(columnPaddings[0]);
+  output += "HOTSPOT".padEnd(columnPaddings[1]);
+  output += "NAME".padEnd(columnPaddings[4]);
+  output += "STATUS";
+  output += "\n";
+
+  for (let i = 0; i < hotspots.length; i++) {
+    const hotspot = hotspots[i];
+    const hnt = hotspot["rewards_24h"].toFixed(2);
+    sum += parseFloat(hnt);
+
+    const ownerName = hotspot["displayName"] && hotspot["displayName"].toString();
+    const blocksBehind = hotspot['block'] - hotspot['last_change_block'];
+    const rewardScale = hotspot['reward_scale'];
+    const onlineStatus = hotspot['status']['online'];
+    const listenAddrs = hotspot['status']['listen_addrs'];
+    console.log(listenAddrs)
+    const relayed = listenAddrs && !!listenAddrs.filter((addr) => { addr.match(/p2p-circuit/) }).length > 0;
+    console.log(hotspot["name"], { ownerName, rewardScale, onlineStatus, listenAddrs, relayed });
+
+    output += `${hnt.toString().padEnd(columnPaddings[0])}${hotspot["name"].padEnd(columnPaddings[1])}`;
+    output += (ownerName ? `@${ownerName}` : "n/a").padEnd(columnPaddings[2]);
+    if (onlineStatus == 'offline') {
+      output += "OFFLINE";
+    }
+    else if (onlineStatus == 'online') {
+      output += `${rewardScale && rewardScale.toFixed(2) || '0'}${!!relayed && 'R' || ''}`.padEnd(columnPaddings[3]);
+      if (blocksBehind >= parseInt(process.env.BLOCK_WARNING_THRESHOLD)) {
+        output += " " + blocksBehind + " behind";
+      }
+    }
+    output += "\n";
+    // `[x](https://explorer.helium.com/address/${hotspot["address"]}`
+  }
+
+  if (process.env.SHOW_TOTAL == '1' && hotspots.length > 1) {
+    output += `---------------------------------------------\n`
+    output += `${sum.toFixed(2)}\n`
+  }
+
+  output += "```\n";
+  return output;
+}
+
+function formatValidatorStats(validators) {
+  // build output
+  let output = "";
+  output += "```ml\n";
+  output += "VALIDATORS\n";
+
+  for (let i = 0; i < validators.length; i++) {
+    const hnt = validators[i]["total"].toFixed(2);
+    output += `${hnt.toString().padEnd(columnPaddings[0])}${validators[i]["displayName"].padEnd(columnPaddings[1])}`;
+    output += `[${validators[i]['penalty'].toFixed(2)}]`
+    output += "\n";
+  }
+
+  output += "```\n";
+  return output;
+}
+
+function formatConfig() {
+  let output = "```ml\n";
+
+  if (DB.getOwners().length > 0) {
+    output += 'VALIDATORS\n';
+    DB.getValidators().forEach(v => {
+      output += `${v['name']} > ${v['address']}\n`
+    });
+    output += "\n";
+  }
+
+  if (DB.getOwners().length > 0) {
+    output += 'OWNERS\n';
+    DB.getOwners().forEach(owner => {
+      output += `${owner['name']} > ${owner['address']}\n`
+    });
+    output += "\n";
+  }
+
+  output += 'HOTSPOTS\n';
+  if (DB.getHotspots().length == 0) { output += "None\n"; }
+  DB.getHotspots().forEach(hotspot => {
+    output += `${hotspot['name']} > ${hotspot['address']}\n`
+  });
+
+  output += "\n```";
+  return output;
+}
+
+function formatHelp() {
+  let output = "```sh\n";
+  output += "HOTSPOT COMMANDS\n"
+  output += "helium config\n"
+  output += "\nhotspot stats\n"
+  output += "hotspot add $address $name\n"
+  output += "hotspot remove $address\n"
+  output += "\nowner add $address $name\n"
+  output += "owner remove $address\n"
+  output += "\nvalidator stats\n"
+  output += "validator add $address $name\n"
+  output += "validator remove $address\n"
+  output += "\n```";
+  return output;
+}
+
+module.exports = {
+  formatHotspotStats,
+  formatValidatorStats,
+  formatConfig,
+  formatHelp,
+}
+
+if(!!process.env.TEST) {
+  console.info("Test mode, not logging in");
+}
+else {
+  console.log(`Hotspot bot starting...`);
+  console.log(`To add it to your server, visit:`);
+  console.log(`https://discord.com/oauth2/authorize?client_id=${process.env.DISCORD_CLIENT_ID}&scope=bot&permissions=1024`);
+  client.login(process.env.DISCORD_TOKEN);
+}
