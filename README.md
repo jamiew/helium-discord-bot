@@ -1,3 +1,5 @@
+[![Test suite](https://github.com/jamiew/helium-discord-bot/actions/workflows/tests.yml/badge.svg)](https://github.com/jamiew/helium-discord-bot/actions/workflows/tests.yml)
+
 # Helium Discord Bot
 
 Display stats about Helium hotspots in your Discord server. Fun for leaderboards with friends.
