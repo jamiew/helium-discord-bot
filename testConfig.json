@@ -1,0 +1,33 @@
+{
+  "hotspots": [
+    {
+      "address": "112SnzqzMcEaF6LKxStjnYFZuquH1pBDCrvJbD6XEtvvvgctG6t6",
+      "name": "test/Chars"
+    },
+    {
+      "address": "112Y8VdyHwkHMWSm7VmqkTyb9URvEeaDh8Ac72kZufH83WcKvUnC",
+      "name": "usuallyOffline"
+    },
+    {
+      "address": "11MjRfdiqJRrCeWpgw5naFqozLhin7hvpbH2e7b3Zw7cfWcyue3"
+    }
+  ],
+  "owners": [
+    {
+      "address": "1362d2xeCFNH5dkVBoZnivkvH19Sv67S8AXJg6tUiDypVe7RSbV",
+      "name": "withOwnerName"
+    },
+    {
+      "address": "14XdQ986bFj8U323Ku68BCCiaZEr2eLjvMZDfxyKgPHLsk4h1xj"
+    }
+  ],
+  "validators": [
+    {
+      "address": "112udkXNE4XoD37aJS1qfkcjfmLYMf5t82BxU6oj5LMsUzzKEqbV",
+      "name": "with name"
+    },
+    {
+      "address": "13HVWria5jsuCuBr9uckVwUpCmawZKgn6AiY3aZcpD42qjMBTgh"
+    }
+  ]
+}

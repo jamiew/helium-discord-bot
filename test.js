@@ -1,17 +1,17 @@
-// run from root of friendo checkout, so it can see the .env file. Like:
-// $ node plugins/helium-hotspots/test.js
+// Run with: `yarn test`
+// Executes all our major commands w/ some sample data
+// duplicates lots of logic from bot.js...
+// is there a javascripty way to fake `client.on(msg)`?
+// or should we just refactor each handler to be their own functions?
+// TODO should test against missing or malformed config items too
 
 require("dotenv").config();
 process.env.TEST = true;
+process.env.CONFIG_PATH = "testConfig.json";
 
 (async () => {
   const HeliumAPI = require('./helium-api');
   const Bot = require('./bot');
-
-  // TODO load some fake config
-
-  // is there a javascripty way to fake `client.on(msg)`?
-  // or do we have to refactor each handler to be their own functions?
 
   testHeader("help");
   let output = Bot.formatHelp();
