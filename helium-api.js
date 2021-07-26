@@ -97,13 +97,14 @@ const getValidatorStats = async function () {
   for (let validator of listValidators()) {
     let _validator = await fetchTotalRewardsForValidator(validator[0]);
     const details = await fetchValidatorDetails(validator[0]);
-    console.log({ details });
-    console.log("Loaded validator: ", _validator, details);
+    // console.debug("Loaded validator: ", _validator, details);
     _validator['address'] = validator[0];
     _validator['displayName'] = validator[1] || details['name'];
     _validator['penalty'] = details['penalty'];
     validators.push(_validator);
   }
+
+  return validators;
 }
 
 const getHotspotStats = async function () {
@@ -158,6 +159,6 @@ const getHotspotStats = async function () {
 
 
 module.exports = {
-  getHotspotStats: getHotspotStats,
-  getValidatorStats: getValidatorStats
+  getHotspotStats,
+  getValidatorStats
 };
