@@ -36,7 +36,6 @@ VALIDATORS
 ```
 
 
-
 ## Setup
 
 Install [nodejs](https://nodejs.org/en/) and [yarn](https://yarnpkg.com/) and run:
