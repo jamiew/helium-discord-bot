@@ -71,11 +71,13 @@ You should see an OAuth URL appear in the console. Copy and open in your browser
 
 ## Running forever
 
-You can srun the bot with `yarn start`, but the bundled `forever` library will restart the bot if it crashes or disconnects:
+You can run the bot with `yarn start`, but the bundled `forever` library will restart the bot if it crashes or disconnects. The `./server.sh` script is a wrapper around it and can be launched using:
 
 ```
-yarn forever
+SERVER_UID=helium yarn server
 ```
+
+You can run multiple bots on same machine by changing `SERVER_UID`
 
 ## Add your hotspots
 

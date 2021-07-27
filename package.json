@@ -18,7 +18,7 @@
   "scripts": {
     "start": "node bot.js",
     "test": "node test.js",
-    "forever": "./server.sh",
+    "server": "./server.sh",
     "watch": "watchexec -r -e js -- yarn start"
   },
   "engines": {
