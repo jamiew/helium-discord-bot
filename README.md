@@ -125,13 +125,13 @@ validator remove {address}
 
 ## Pull requests welcome
 
-There are some very basic tests. Basically tries to run the script, and requires some data in `config.json`
-
-Run:
+There are some basic tests you should run first:
 
 ```
 yarn test
 ```
+
+This uses sample configuration data from `testConfig.json`. If you find examples that cause regressions, please add it to the list.
 
 ## Freely licensed
 
