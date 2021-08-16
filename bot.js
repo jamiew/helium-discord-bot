@@ -301,7 +301,7 @@ function formatHelp() {
   output += "HOTSPOT COMMANDS\n"
   output += "helium config\n"
   output += "\nhotspot stats\n"
-  output += "hotspot activity $name\n"
+  output += "hotspot activity [$name|$addres]s\n"
   output += "hotspot add $address $name\n"
   output += "hotspot remove $address\n"
   output += "\nowner add $address $name\n"
