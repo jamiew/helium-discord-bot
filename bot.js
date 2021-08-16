@@ -118,7 +118,7 @@ client.on('message', async message => {
 // currently shared b/w both hotspot & validator stats,
 // but could just dynamically adjust based on output
 const columnPaddings = [8, 30, 14, 8];
-const activityPaddings = [27, 25, 22, 47];
+const activityPaddings = [27, 25, 27, 52];
 
 function formatHotspotStats(hotspots) {
   let sum = 0;
@@ -218,14 +218,20 @@ function formatHotspotActivity(allActivity) {
             type = '.Witness Beacon';
             if(witness['is_valid'] === false){
               type = '//Witness Beacon (Invalid)';
+              details = formatType(witness['invalid_reason']);
+              meta = 'RSSI: ' + witness['signal'].toString() + 'dBm SNR: ' + witness['snr'].toFixed(1) + ' dB';
             }
           }
         }
       }
-      details += 'Total witnesses: ' + activity['path'][0]['witnesses'].length.toString();
-      meta += activity['path'][0]['geocode']['short_city']+' ';
-      meta += activity['path'][0]['geocode']['short_state']+' ';
-      meta += activity['path'][0]['geocode']['short_country']+' ';
+      if(details === ''){
+        details += 'Total witnesses: ' + activity['path'][0]['witnesses'].length.toString();
+      }
+      if(meta === ''){
+        meta += activity['path'][0]['geocode']['short_city']+' ';
+        meta += activity['path'][0]['geocode']['short_state']+' ';
+        meta += activity['path'][0]['geocode']['short_country']+' ';
+      }
     }
 
     const time = formatEpoch(activity['time']);
@@ -346,6 +352,18 @@ function formatType(type) {
 
     case 'poc_challengees':
       output = 'Beacon'
+      break;
+
+    case 'witness_rssi_below_lower_bound':
+      output = 'Low RSSI'
+      break;
+
+    case 'witness_too_close':
+      output = 'Too Close'
+      break;
+
+    case 'witness_rssi_too_high':
+      output = 'High RSSI'
       break;
 
     default:
