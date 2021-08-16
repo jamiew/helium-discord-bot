@@ -74,6 +74,23 @@ client.on('message', async message => {
       await message.react("👍");
       break;
 
+    case 'hotspot activity':
+      try {
+        await message.react("✨");
+        activity = await HeliumAPI.getHotspotActivity(args[2]);
+        if (activity !== undefined) {
+          output = formatHotspotActivity(activity);
+          await sendActivityMessage(message, output);
+        }
+        else {
+          await message.channel.send("No activity found.")
+        }
+      } catch (error) {
+        await message.channel.send(`Error: ${error} \nMake sure you use a valid hotspot ID or name-with-hyphens.`);
+        throw error;
+      }
+      break;
+
     case 'owner add':
       await DB.addOwnerAddress(args[2], args[3]);
       await message.react("👍");
@@ -101,6 +118,7 @@ client.on('message', async message => {
 // currently shared b/w both hotspot & validator stats,
 // but could just dynamically adjust based on output
 const columnPaddings = [8, 30, 14, 8];
+const activityPaddings = [27, 25, 22, 47];
 
 function formatHotspotStats(hotspots) {
   let sum = 0;
@@ -147,6 +165,88 @@ function formatHotspotStats(hotspots) {
     output += `${sum.toFixed(2)}\n`
   }
 
+  return output;
+}
+
+function formatHotspotActivity(allActivity) {
+  let output = "";
+
+  // headers
+  output += "== TYPE".padEnd(activityPaddings[0]);
+  output += "DETAILS".padEnd(activityPaddings[1]);
+  output += "META".padEnd(activityPaddings[2]);
+  output += "TIME ==";
+  output += "\n";
+
+  for (let i = 0; i < allActivity.length; i++) {
+    const activity = allActivity[i];
+    let now = Math.round(Date.now() / 1000);
+    let days = 60 * 60 * 24 * 1;
+    if(activity['time'] < (now - days)){
+      break;
+    }
+    let type = formatType(activity["type"]);
+    let details = '';
+    let meta = '';
+    if (type === '`Received Mining Rewards'){
+      details += '[';
+      for (reward of activity["rewards"]) {
+        details += formatType(reward['type'])+': +';
+        details += (reward['amount'] / 100000000).toFixed(2)+' HNT, ';
+      }
+      details = details.substring(0, details.length - 2);
+      details += ']';
+    }
+    if (type === '[Transfer Packets'){
+      let packets = 0;
+      for (summaries of activity['state_channel']['summaries']){
+        packets = packets + summaries['num_packets'];
+      }
+      details += 'Packets: '+ packets;
+    }
+    if (type === 'Unknown Beacon'){
+      if(activity['challenger'] === allActivity.hotspot){
+        type = '.Challenged Beaconer';
+      } else if(activity['path'][0]['receipt'] === null){
+        type = '//Witness Beacon (Invalid)';
+      } else if(activity['path'][0]['receipt']['gateway'] === allActivity.hotspot){
+        type = '.Sent Beacon';
+      } else {
+        type = '.Witness Beacon';
+        for(witness of activity['path'][0]['witnesses']){
+          if (witness['gateway'] === allActivity.hotspot){
+            type = '.Witness Beacon';
+            if(witness['is_valid'] === false){
+              type = '//Witness Beacon (Invalid)';
+            }
+          }
+        }
+      }
+      details += 'Total witnesses: ' + activity['path'][0]['witnesses'].length.toString();
+      meta += activity['path'][0]['geocode']['short_city']+' ';
+      meta += activity['path'][0]['geocode']['short_state']+' ';
+      meta += activity['path'][0]['geocode']['short_country']+' ';
+    }
+
+    const time = formatEpoch(activity['time']);
+
+    console.log(activity["name"], { type, details, meta, time });
+    if (type === '`Received Mining Rewards'){
+      output += `${type.padEnd(activityPaddings[0])}${details.padEnd(activityPaddings[3])}`;
+      output += `${time}\'`;
+    } else {
+      output += `${type.padEnd(activityPaddings[0])}${details.padEnd(activityPaddings[1])}`;
+      output += `${meta.toString().padEnd(activityPaddings[2])}${time}`;
+    }
+    if(type === '[Transfer Packets'){
+      output += "]";
+    }
+    output += "\n";
+    // `[x](https://explorer.helium.com/address/${hotspot["address"]}`
+  }
+
+  if (process.env.SHOW_TOTAL == '1' && hotspots.length > 1) {
+  }
   return output;
 }
 
@@ -199,6 +299,7 @@ function formatHelp() {
   output += "HOTSPOT COMMANDS\n"
   output += "helium config\n"
   output += "\nhotspot stats\n"
+  output += "hotspot activity\n"
   output += "hotspot add $address $name\n"
   output += "hotspot remove $address\n"
   output += "\nowner add $address $name\n"
@@ -208,6 +309,52 @@ function formatHelp() {
   output += "validator remove $address\n"
   output += "\n```";
   return output;
+}
+
+function formatType(type) {
+  let output = '';
+  switch (type) {
+    case 'rewards_v2':
+      output = '`Received Mining Rewards'
+      break;
+
+    case 'poc_witnesses':
+      output = 'Witness'
+      break;
+
+    case 'poc_receipts_v1':
+      output = 'Unknown Beacon'
+      break;
+
+    case 'poc_challengers':
+      output = 'Challenger'
+      break;
+
+    case 'state_channel_close_v1':
+      output = '[Transfer Packets'
+      break;
+
+    case 'poc_request_v1':
+      output = 'Created Challange'
+      break;
+
+    case 'data_credits':
+      output = 'Data'
+      break;
+
+    case 'poc_challengees':
+      output = 'Beacon'
+      break;
+
+    default:
+      output = 'Unknown';
+  }
+  return output;
+}
+
+function formatEpoch(epoch){
+  var myDate = new Date(epoch*1000);
+  return myDate.toLocaleString()
 }
 
 // if necessary, split into 2k character chunks and send multiple messages
@@ -236,8 +383,20 @@ async function sendStatsMessage(message, fullText) {
   }
 }
 
+async function sendActivityMessage(message, fullText) {
+  // 2k discord character max, we add ~10 characters, just fudge to 1900
+  const chunks = chunkifyString(fullText, 1900)
+  for(chunk of chunks) {
+    let output = "```AsciiDoc\n";
+    output += chunk;
+    output += "```\n"
+    await message.channel.send(output);
+  }
+}
+
 module.exports = {
   formatHotspotStats,
+  formatHotspotActivity,
   formatValidatorStats,
   formatConfig,
   formatHelp,

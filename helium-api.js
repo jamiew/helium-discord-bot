@@ -22,8 +22,20 @@ const fetchHotspotsForOwner = async function (owner) {
   return rsp.data;
 };
 
+const fetchHotspotsByName = async function (name) {
+  let rsp = await httpGet(`https://api.helium.io/v1/hotspots/name/${name}`);
+  return rsp.data;
+};
+
 const fetchRewardSumForHotspot = async function (address) {
   let rsp = await httpGet(`https://api.helium.io/v1/hotspots/${address}/rewards/sum${queryParams()}`);
+  return rsp.data;
+};
+
+const fetchActivityForHotspot = async function (address) {
+  let rsp = await httpGet(`https://api.helium.io/v1/hotspots/${address}/activity`);
+  cursor = await httpGet(`https://api.helium.io/v1/hotspots/${address}/activity?cursor=${rsp['cursor']}`);
+  Array.prototype.push.apply(rsp.data,cursor.data);
   return rsp.data;
 };
 
@@ -157,8 +169,21 @@ const getHotspotStats = async function () {
   return hotspots;
 };
 
+const getHotspotActivity = async function (hotspot) {
+  // hydrate with activity data
+  if(hotspot.includes('-')){
+    let details = await fetchHotspotsByName(hotspot);
+    hotspot = details[0]['address'];
+  }
+  let activity = await fetchActivityForHotspot(hotspot);
+  activity.hotspot = hotspot;
+
+  return activity;
+};
+
 
 module.exports = {
   getHotspotStats,
+  getHotspotActivity,
   getValidatorStats
 };
