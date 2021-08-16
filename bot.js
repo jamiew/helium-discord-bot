@@ -270,16 +270,18 @@ function formatConfig() {
 
   if (DB.getOwners().length > 0) {
     output += 'VALIDATORS\n';
+    if (DB.getValidators().length == 0) { output += "None\n"; }
     DB.getValidators().forEach(v => {
-      output += `${v['name']} > ${v['address']}\n`
+      output += `${v['name']} > "${v['address']}"\n`
     });
     output += "\n";
   }
 
   if (DB.getOwners().length > 0) {
     output += 'OWNERS\n';
+    if (DB.getOwners().length == 0) { output += "None\n"; }
     DB.getOwners().forEach(owner => {
-      output += `${owner['name']} > ${owner['address']}\n`
+      output += `${owner['name']} > "${owner['address']}"\n`
     });
     output += "\n";
   }
