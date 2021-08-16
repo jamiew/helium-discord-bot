@@ -66,7 +66,7 @@ client.on('message', async message => {
 
     case 'hotspot add':
       await DB.addHotspotAddress(args[2], args[3]);
-      await message.react("👍");;
+      await message.react("👍");
       break;
 
     case 'hotspot remove':
@@ -109,8 +109,8 @@ function formatHotspotStats(hotspots) {
   // headers
   output += "HNT".padEnd(columnPaddings[0]);
   output += "HOTSPOT".padEnd(columnPaddings[1]);
-  output += "NAME".padEnd(columnPaddings[4]);
-  output += "STATUS";
+  output += "NAME".padEnd(columnPaddings[2]);
+  output += "STATUS".padEnd(columnPaddings[3]);
   output += "\n";
 
   for (let i = 0; i < hotspots.length; i++) {
@@ -124,7 +124,7 @@ function formatHotspotStats(hotspots) {
     const onlineStatus = hotspot['status']['online'];
     const listenAddrs = hotspot['status']['listen_addrs'];
     console.log(listenAddrs)
-    const relayed = listenAddrs && !!listenAddrs.filter((addr) => { addr.match(/p2p-circuit/) }).length > 0;
+    let relayed = listenAddrs[0].includes('p2p-circuit');
     console.log(hotspot["name"], { ownerName, rewardScale, onlineStatus, listenAddrs, relayed });
 
     output += `${hnt.toString().padEnd(columnPaddings[0])}${hotspot["name"].padEnd(columnPaddings[1])}`;
@@ -133,7 +133,7 @@ function formatHotspotStats(hotspots) {
       output += "OFFLINE";
     }
     else if (onlineStatus == 'online') {
-      output += `${rewardScale && rewardScale.toFixed(2) || '0'}${!!relayed && 'R' || ''}`.padEnd(columnPaddings[3]);
+      output += `${rewardScale && rewardScale.toFixed(2) || '0'}${!!relayed && ' Relayed' || ''}`.padEnd(columnPaddings[3]);
       if (blocksBehind >= parseInt(process.env.BLOCK_WARNING_THRESHOLD)) {
         output += " " + blocksBehind + " behind";
       }
