@@ -88,11 +88,16 @@ Write `hotspot help` to see all the commands for managing owners/hotspots
 hotspot stats
 hotspot config
 
+hotspot activity $address
 hotspot add $address $name
 hotspot remove $address
 
 owner add $address $name
 owner remove $address
+
+validator stats
+validator add $address $name
+validator remove $address
 ```
 
 So to add [Immense Shamrock Whale](https://explorer.helium.com/hotspots/112gxJkVqJF3REaJekpjmassJGiSs2jMu9GqtnZGDbd4n6xFfvws) owned by user `your_name`:
@@ -105,6 +110,13 @@ To add all hotspots associated with an account:
 
 ```
 hotspot add 12ywrqqzeNFwSMvCcaohpVdiwEeK4NZChtL9rs7dhKYd85fKG9U your_name
+```
+
+Check the last 24 hours of activity using a hotspot address or the hotspot name with hyphens!
+
+```
+hotspot activity 112gxJkVqJF3REaJekpjmassJGiSs2jMu9GqtnZGDbd4n6xFfvws
+hotspot activity immense-shamrock-whale
 ```
 
 ## Add your validators
