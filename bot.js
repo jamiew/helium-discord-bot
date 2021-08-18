@@ -142,7 +142,10 @@ function formatHotspotStats(hotspots) {
     const onlineStatus = hotspot['status']['online'];
     const listenAddrs = hotspot['status']['listen_addrs'];
     console.log(listenAddrs)
-    let relayed = listenAddrs[0].includes('p2p-circuit');
+    let relayed = false;
+    if(listenAddrs[0]){
+      relayed = listenAddrs[0].includes('p2p-circuit');
+    }
     console.log(hotspot["name"], { ownerName, rewardScale, onlineStatus, listenAddrs, relayed });
 
     output += `${hnt.toString().padEnd(columnPaddings[0])}${hotspot["name"].padEnd(columnPaddings[1])}`;
@@ -322,6 +325,14 @@ function formatHelp() {
 function formatType(type) {
   let output = '';
   switch (type) {
+    case 'add_gateway_v1':
+      output = 'Added to Blockchain'
+      break;
+
+    case 'assert_location_v2':
+      output = 'Asserted Location'
+      break;
+
     case 'rewards_v2':
       output = '`Received Mining Rewards'
       break;
