@@ -79,11 +79,11 @@ client.on('message', async message => {
         await message.react("✨");
         activity = await HeliumAPI.getHotspotActivity(args[2]);
         if (activity !== undefined) {
-          await message.channel.send("No activity found.")
-        }
-        else {
           output = formatHotspotActivity(activity);
           await sendActivityMessage(message, output);
+        }
+        else {
+          await message.channel.send("No activity found.")
         }
       } catch (error) {
         await message.channel.send(`Error: ${error} \nMake sure you use a valid hotspot ID, name-with-hyphens, or even 'name without hyphens'.`);
@@ -141,7 +141,6 @@ function formatHotspotStats(hotspots) {
     const rewardScale = hotspot['reward_scale'];
     const onlineStatus = hotspot['status']['online'];
     const listenAddrs = hotspot['status']['listen_addrs'];
-    console.log(listenAddrs)
     let relayed = false;
     if(!!listenAddrs && listenAddrs[0]){
       relayed = listenAddrs[0].includes('p2p-circuit');
@@ -175,6 +174,7 @@ function formatHotspotActivity(allActivity) {
   let output = "";
 
   // truncate just to first 20 results
+  console.log("formatHotspotActivity, # results =>", allActivity.length);
   allActivity = allActivity.slice(0,19);
 
   // headers
