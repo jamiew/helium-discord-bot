@@ -22,7 +22,7 @@ const fetchHotspotsForOwner = async function (owner) {
   return rsp.data;
 };
 
-const fetchHotspotsByName = async function (name) {
+const fetchHotspotByName = async function (name) {
   const rsp = await httpGet(`https://api.helium.io/v1/hotspots/name/${name}`);
   return rsp.data;
 };
@@ -35,8 +35,11 @@ const fetchRewardSumForHotspot = async function (address) {
 // fetches first 2 pages of activity data; 1st page is usually empty
 const fetchActivityForHotspot = async function (address) {
   const rsp = await httpGet(`https://api.helium.io/v1/hotspots/${address}/activity`);
-  const cursor = await httpGet(`https://api.helium.io/v1/hotspots/${address}/activity?cursor=${rsp['cursor']}`);
-  Array.prototype.push.apply(rsp.data, cursor.data);
+  if(!rsp.data || rsp.data.length < 10 || !!rsp.cursor){
+    console.log("fetchActivityForHotspot: fetching a second page, only a few results in page 1", rsp.data.length);
+    const cursor = await httpGet(`https://api.helium.io/v1/hotspots/${address}/activity?cursor=${rsp['cursor']}`);
+    Array.prototype.push.apply(rsp.data, cursor.data);
+  }
   return rsp.data;
 };
 
@@ -170,26 +173,33 @@ const getHotspotStats = async function () {
   return hotspots;
 };
 
-// "hotspot" argument can be address, or name with or without hyphens
-// e.g. both "slow-burgundy-mandrill" and "slow burgundy mandrill" are valid
-const getHotspotActivity = async function (hotspot) {
-  if(hotspot.includes('-') || hotspot.includes(' ')){
-    hotspot = hotspot.replace(/ /g, '-');
-    const details = await fetchHotspotsByName(hotspot);
-    console.log(details);
-    hotspot = details[0]['address'];
-  }
-
-  // fetch activity, but truncate to 10 lines
+const getHotspotActivity = async function (name_or_address) {
+  const hotspot = await getAddressForHotspot(name_or_address);
   const activity = await fetchActivityForHotspot(hotspot);
   activity.hotspot = hotspot;
-
   return activity;
 };
 
 
+// "hotspot" argument can be address, or name with or without hyphens
+// e.g. both "slow-burgundy-mandrill" and "slow burgundy mandrill" are valid
+const getAddressForHotspot = async function(hotspot) {
+  hotspot = hotspot.trim();
+  if(hotspot.includes('-') || hotspot.includes(' ')){
+    hotspot = hotspot.replace(/ /g, '-');
+    const details = await fetchHotspotByName(hotspot);
+    if(!details){
+      throw(`Failed to fetch address for hotspot name ${hotspot}`);
+    }
+    return details[0]['address'];
+  } else {
+    return hotspot;
+  }
+};
+
 module.exports = {
   getValidatorStats,
   getHotspotStats,
-  getHotspotActivity
+  getHotspotActivity,
+  getAddressForHotspot
 };
