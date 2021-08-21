@@ -174,7 +174,7 @@ const getHotspotStats = async function () {
 // e.g. both "slow-burgundy-mandrill" and "slow burgundy mandrill" are valid
 const getHotspotActivity = async function (hotspot) {
   if(hotspot.includes('-')){
-    const details = await fetchHotspotsByName(hotspot);
+    const details = await fetchHotspotsByName(hotspot.toLowerCase());
     console.log(details);
     hotspot = details[0]['address'];
   }
