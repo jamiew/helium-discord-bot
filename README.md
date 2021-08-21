@@ -35,6 +35,13 @@ VALIDATORS
 21.95  scrawny-cobalt-raven
 ```
 
+And lastly, there's a `hotspot activity` command that will debug recent beacons, witnesses & other events:
+
+```
+hotspot activity slow-burgundy-mandrill
+```
+![](https://dl.dropboxusercontent.com/s%2F45qf9hej0slkg3v%2Fscreen%2520shot%25202021-08-21%2520at%252010-42-16%2520hotspots%2520%2528dev%2529%2520-%2520discord.png)
+
 
 ## Setup
 

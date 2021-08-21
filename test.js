@@ -9,7 +9,11 @@ require("dotenv").config();
 process.env.TEST = true;
 process.env.CONFIG_PATH = "testConfig.json";
 
-(async () => {
+function testHeader(name) {
+  console.log(`\n******************** ${name} ********************\n`);
+}
+
+const tests = async () => {
   const HeliumAPI = require('./helium-api');
   const Bot = require('./bot');
 
@@ -33,24 +37,31 @@ process.env.CONFIG_PATH = "testConfig.json";
   output = Bot.formatValidatorStats(validators);
   console.log(output);
 
+  const testHotspot = 'slow-burgundy-mandrill'; // the OG
+  testHeader(`hotspot activity ${testHotspot}`);
+  const activity = await HeliumAPI.getHotspotActivity(testHotspot);
+  if(!activity || activity.length == 0){ throw("No activity data") };
+  output = await Bot.formatHotspotActivity(activity);
+  console.log(output);
+
   // test support for all possible hotspot names
-  const testHotspots = [
+  testHeader('hotspot names => addresses');
+  const testNames = [
     '11Kj6LV5M51PzPjBVbtgESL625SsrzdPoi59PDPQ2xdeozNuRuq',
     'slow-burgundy-mandrill',
-    'slow burgundy mandrill'
+    'slow burgundy mandrill',
+    ' slow burgundy mandrill '
   ];
-  for(testHotspot of testHotspots){
-    testHeader(`hotspot activity ${testHotspot}`);
-    const activity = await HeliumAPI.getHotspotActivity(testHotspot);
-    if(!activity || activity.length == 0){ throw("No activity data") };
-    output = await Bot.formatHotspotActivity(activity);
-    console.log(output);
-  };
+  for(hotspot of testNames){
+    const address = await HeliumAPI.getAddressForHotspot(hotspot);
+    console.log(`${hotspot} => ${address}`);
+    if(address != testNames[0]) {
+      throw(`Expected ${hotspot} to resolve to ${testNames[0]}`);
+    }
+  }
+};
 
-  // if we got this far we are gtg
-  process.exit(0);
-})();
-
-function testHeader(name) {
-  console.log(`\n******************** ${name} ********************\n`);
-}
+// run everything
+tests()
+  .then(() => { console.log("\n✅ Great success"); process.exit(0) })
+  .catch((e) => { console.log("\n❌ Errors! Test run failed. e => ", e); process.exit(1) });

@@ -144,7 +144,6 @@ function formatHotspotStats(hotspots) {
     const rewardScale = hotspot['reward_scale'];
     const onlineStatus = hotspot['status']['online'];
     const listenAddrs = hotspot['status']['listen_addrs'];
-    console.log(listenAddrs)
     let relayed = false;
     if(!!listenAddrs && listenAddrs[0]){
       relayed = listenAddrs[0].includes('p2p-circuit');
@@ -179,6 +178,7 @@ function formatHotspotActivity(allActivity) {
 
   // truncate just to first 20 results
   allActivity = allActivity.slice(0,(process.env.MAX_ACTIVITY - 1));
+  console.log("formatHotspotActivity, # results =>", allActivity.length);
 
   // headers
   output += "== TYPE".padEnd(activityPaddings[0]);
