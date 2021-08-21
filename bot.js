@@ -141,7 +141,6 @@ function formatHotspotStats(hotspots) {
     const rewardScale = hotspot['reward_scale'];
     const onlineStatus = hotspot['status']['online'];
     const listenAddrs = hotspot['status']['listen_addrs'];
-    console.log(listenAddrs)
     let relayed = false;
     if(!!listenAddrs && listenAddrs[0]){
       relayed = listenAddrs[0].includes('p2p-circuit');
