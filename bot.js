@@ -81,7 +81,6 @@ client.on('message', async message => {
 			args[2] = args[2] + '-' + args[3] + '-' + args[4];
 		}
         activity = await HeliumAPI.getHotspotActivity(args[2]);
-		console.log(activity);
         if (activity !== undefined) {
           output = formatHotspotActivity(activity);
           await sendActivityMessage(message, output);
@@ -246,7 +245,6 @@ function formatHotspotActivity(allActivity) {
 
     const time = formatEpoch(activity['time']);
 
-    console.log(activity["name"], { type, details, meta, time });
     if (type === '`Received Mining Rewards'){
       output += `${type.padEnd(activityPaddings[0])}${details.padEnd(activityPaddings[3])}`;
       output += `${time}\'`;
