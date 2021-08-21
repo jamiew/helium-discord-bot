@@ -5,65 +5,84 @@ const FileSync = require('lowdb/adapters/FileSync')
 const adapter = new FileSync(process.env.CONFIG_PATH)
 const db = low(adapter)
 
-db.defaults({ owners: [], hotspots: [], validators: [] }).write()
-
-const initServer = async function (serverID) {
-  const defaults = { owners: [], hotspots: [], validators: [] };
-  const serverKey = `server_${serverID}`;
-  if(db.get(serverKey)){
-    console.log(`${serverKey} appears to be initialized:`, db.get(serverKey));
+const initServer = async function (guildID) {
+  // const guildID = `server_${serverID}`;
+  if(db.get(guildID).keys().value().length > 0){
+    console.log(`${guildID} appears to be initialized:`, db.get(guildID).value());
+    console.log(db.get(guildID).get('hotspots').value());
     return null;
   }
   else {
-    console.log(`Initializing hash for ${serverKey}`);
-    return db.write(serverKey, defaults);
+    console.log(`Initializing hash for ${guildID}`);
+    const defaults = {}
+    defaults[guildID] = { owners: [], hotspots: [], validators: [] };
+    return db.get(guildID).value();
   }
 }
 
-const addHotspotAddress = async function (address, name) {
-  db.get('hotspots').push({
-    address: address,
-    name: name
-  }).write();
+const addHotspotAddress = async function (guildID, address, name) {
+  db.get(guildID)
+    .get('hotspots')
+    .push({
+      address: address,
+      name: name
+    })
+    .write();
 };
 
-const removeHotspotAddress = function (address) {
-  db.get('hotspots').remove({ address: address }).write();
+const removeHotspotAddress = function (guildID, address) {
+  db.get(guildID, 'hotspots')
+    .remove({ address: address })
+    .write();
 };
 
-const addOwnerAddress = function (address, name) {
-  db.get('owners').push({
-    address: address,
-    name: name
-  }).write();
+const addOwnerAddress = function (guildID, address, name) {
+  db.get(guildID, 'owners')
+    .push({
+      address: address,
+      name: name
+    })
+    .write();
 };
 
-const removeOwnerAddress = function (address) {
-  db.get('owners').remove({ address: address }).write();
+const removeOwnerAddress = function (guildID, address) {
+  db.get(guildID, 'owners')
+    .remove({ address: address })
+    .write();
 };
 
-const addValidator = function (address, name) {
-  db.get('validators').push({
-    address: address,
-    name: name
-  }).write();
+const addValidator = function (guildID, address, name) {
+  db.get(guildID, 'validators')
+    .push({
+      address: address,
+      name: name
+    })
+    .write();
 };
 
-const removeValidator = function (address) {
-  db.get('validators').remove({ address: address }).write();
+const removeValidator = function (guildID, address) {
+  db.get(guildID, 'validators')
+    .remove({ address: address })
+    .write();
 };
 
 
-const getValidators = function () {
-  return db.get('validators').value();
+const getValidators = function (guildID) {
+  console.log("getValidators guildID=>", guildID);
+  const value = db.get(guildID, 'validators').value();
+  console.log("value =>", value);
+  console.log(db.get(guildID).value());
+  console.log(db.get(guildID, 'validators').value());
+  console.log(db.get(guildID).get('validators').value());
+  return value;
 }
 
-const getOwners = function () {
-  return db.get('owners').value()
+const getOwners = function (guildID) {
+  return db.get(guildID, 'owners').value()
 }
 
-const getHotspots = function () {
-  return db.get('hotspots').value()
+const getHotspots = function (guildID) {
+  return db.get(guildID).get('hotspots').value()
 }
 
 module.exports = {

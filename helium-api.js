@@ -83,8 +83,8 @@ const dateTimeParams = function () {
   return "max_time=" + formatDate(maxTime) + "&min_time=" + formatDate(minTime);
 };
 
-const listValidators = function () {
-  let validators = DB.getValidators();
+const listValidators = function (guildID) {
+  let validators = DB.getValidators(guildID);
   if (validators === undefined) {
     return undefined;
   }
@@ -92,8 +92,8 @@ const listValidators = function () {
   return new Map(validators.map(x => [x['address'], x['name']] ));
 };
 
-const listOwners = function () {
-  let owners = DB.getOwners();
+const listOwners = function (guildID) {
+  let owners = DB.getOwners(guildID);
   if (owners === undefined) {
     return undefined;
   }
@@ -101,8 +101,8 @@ const listOwners = function () {
   return new Map(owners.map(x => [x['address'], x['name']] ));
 };
 
-const listHotspots = function () {
-  let hotspots = DB.getHotspots();
+const listHotspots = function (guildID) {
+  let hotspots = DB.getHotspots(guildID);
   if (hotspots === undefined) {
     return undefined;
   }
@@ -110,14 +110,14 @@ const listHotspots = function () {
   return new Map(hotspots.map(x => [x['address'], x['name']] ));
 };
 
-const getValidatorStats = async function () {
+const getValidatorStats = async function (guildID) {
   if (listValidators() === undefined || listValidators().size == 0) {
     log("getValidatorStats: VALIDATORS are not set, please add some using the bot commands (see `helium help`)");
     return undefined;
   }
 
   const validators = [];
-  for (let validator of listValidators()) {
+  for (let validator of listValidators(guildID)) {
     let _validator = await fetchTotalRewardsForValidator(validator[0]);
     const details = await fetchValidatorDetails(validator[0]);
     // console.debug("Loaded validator: ", _validator, details);

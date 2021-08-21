@@ -8,12 +8,26 @@ const client = new Discord.Client();
 
 client.on('ready', () => {
   console.log(`Logged in as ${client.user.tag}`);
+
+  DB.initServer().then(function(){
+    console.log("Initialized database", DB.value());
+  });
 });
 
 client.on('message', async message => {
   const args = message.content.split(" ");
   const command = args.slice(0, 2).join(" ").toLowerCase();
   let output = null;
+
+  console.log("message =>", message.content);
+  console.log("guild =>", message.guild.name, message.guild.id);
+  const guildID = message.guild.id;
+
+  if(!guildID){
+    console.log(message.content);
+    await message.channel.send("Sorry, this bot must be used inside a server. Long story");
+    return;
+  }
 
   switch (command) {
     case 'helium help':
@@ -26,7 +40,7 @@ client.on('message', async message => {
     case 'validator stat':
       try {
         await message.react("✨");
-        const validators = await HeliumAPI.getValidatorStats();
+        const validators = await HeliumAPI.getValidatorStats(guildID);
         if (validators !== undefined) {
           output = formatValidatorStats(validators);
           await sendStatsMessage(message, output);
@@ -44,7 +58,7 @@ client.on('message', async message => {
     case 'hotspot stat':
       try {
         await message.react("✨");
-        hotspots = await HeliumAPI.getHotspotStats();
+        hotspots = await HeliumAPI.getHotspotStats(guildID);
         if (hotspots !== undefined) {
           output = formatHotspotStats(hotspots);
           await sendStatsMessage(message, output);
@@ -60,17 +74,17 @@ client.on('message', async message => {
 
     case 'helium config':
     case 'hotspot config':
-      output = formatConfig();
+      output = formatConfig(guildID);
       await message.channel.send(output);
       break;
 
     case 'hotspot add':
-      await DB.addHotspotAddress(args[2], args[3]);
+      await DB.addHotspotAddress(guildID, args[2], args[3]);
       await message.react("👍");
       break;
 
     case 'hotspot remove':
-      await DB.removeHotspotAddress(args[2]);
+      await DB.removeHotspotAddress(guildID, args[2]);
       await message.react("👍");
       break;
 
@@ -95,22 +109,22 @@ client.on('message', async message => {
       break;
 
     case 'owner add':
-      await DB.addOwnerAddress(args[2], args[3]);
+      await DB.addOwnerAddress(guildID, args[2], args[3]);
       await message.react("👍");
       break;
 
     case 'owner remove':
-      await DB.removeOwnerAddress(args[2]);
+      await DB.removeOwnerAddress(guildID, args[2]);
       await message.react("👍");
       break;
 
     case 'validator add':
-      await DB.addValidator(args[2], args[3]);
+      await DB.addValidator(guildID, args[2], args[3]);
       await message.react("👍");
       break;
 
     case 'validator remove':
-      await DB.removeValidator(args[2]);
+      await DB.removeValidator(guildID, args[2]);
       await message.react("👍");
       break;
   }
@@ -273,30 +287,30 @@ function formatValidatorStats(validators) {
   return output;
 }
 
-function formatConfig() {
+function formatConfig(guildID) {
   let output = "```ml\n";
 
-  if (DB.getOwners().length > 0) {
+  if (DB.getOwners(guildID).length > 0) {
     output += 'VALIDATORS\n';
-    if (DB.getValidators().length == 0) { output += "None\n"; }
-    DB.getValidators().forEach(v => {
+    if (DB.getValidators(guildID).length == 0) { output += "None\n"; }
+    DB.getValidators(guildID).forEach(v => {
       output += `${v['name']} > "${v['address']}"\n`
     });
     output += "\n";
   }
 
-  if (DB.getOwners().length > 0) {
+  if (DB.getOwners(guildID).length > 0) {
     output += 'OWNERS\n';
-    if (DB.getOwners().length == 0) { output += "None\n"; }
-    DB.getOwners().forEach(owner => {
+    if (DB.getOwners(guildID).length == 0) { output += "None\n"; }
+    DB.getOwners(guildID).forEach(owner => {
       output += `${owner['name']} > "${owner['address']}"\n`
     });
     output += "\n";
   }
 
   output += 'HOTSPOTS\n';
-  if (DB.getHotspots().length == 0) { output += "None\n"; }
-  DB.getHotspots().forEach(hotspot => {
+  if (DB.getHotspots(guildID).length == 0) { output += "None\n"; }
+  DB.getHotspots(guildID).forEach(hotspot => {
     output += `${hotspot['name']} > "${hotspot['address']}"\n`
   });
 

@@ -17,22 +17,24 @@ const tests = async () => {
   const HeliumAPI = require('./helium-api');
   const Bot = require('./bot');
 
+  const guildID = '123456789'; // FIXME
+
   testHeader("help");
   let output = Bot.formatHelp();
   console.log(output);
 
   testHeader("config");
-  output = Bot.formatConfig();;
+  output = Bot.formatConfig(guildID);
   console.log(output);
 
   testHeader("hotspot stats");
-  const hotspots = await HeliumAPI.getHotspotStats();
+  const hotspots = await HeliumAPI.getHotspotStats(guildID);
   if(!hotspots || hotspots.length == 0){ throw("No hotspots") };
   output = Bot.formatHotspotStats(hotspots);
   console.log(output);
 
   testHeader("validator stats");
-  const validators = await HeliumAPI.getValidatorStats();
+  const validators = await HeliumAPI.getValidatorStats(guildID);
   if(!validators || validators.length == 0){ throw("No validators") };
   output = Bot.formatValidatorStats(validators);
   console.log(output);
