@@ -173,8 +173,7 @@ const getHotspotStats = async function () {
 // "hotspot" argument can be address, or name with or without hyphens
 // e.g. both "slow-burgundy-mandrill" and "slow burgundy mandrill" are valid
 const getHotspotActivity = async function (hotspot) {
-  if(hotspot.includes('-') || hotspot.includes(' ')){
-    hotspot = hotspot.replace(/ /g, '-');
+  if(hotspot.includes('-')){
     const details = await fetchHotspotsByName(hotspot);
     console.log(details);
     hotspot = details[0]['address'];
