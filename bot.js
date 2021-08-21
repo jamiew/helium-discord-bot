@@ -79,14 +79,14 @@ client.on('message', async message => {
         await message.react("✨");
         activity = await HeliumAPI.getHotspotActivity(args[2]);
         if (activity !== undefined) {
+          await message.channel.send("No activity found.")
+        }
+        else {
           output = formatHotspotActivity(activity);
           await sendActivityMessage(message, output);
         }
-        else {
-          await message.channel.send("No activity found.")
-        }
       } catch (error) {
-        await message.channel.send(`Error: ${error} \nMake sure you use a valid hotspot ID or name-with-hyphens.`);
+        await message.channel.send(`Error: ${error} \nMake sure you use a valid hotspot ID, name-with-hyphens, or even 'name without hyphens'.`);
         throw error;
       }
       break;
@@ -143,7 +143,7 @@ function formatHotspotStats(hotspots) {
     const listenAddrs = hotspot['status']['listen_addrs'];
     console.log(listenAddrs)
     let relayed = false;
-    if(listenAddrs[0]){
+    if(!!listenAddrs && listenAddrs[0]){
       relayed = listenAddrs[0].includes('p2p-circuit');
     }
     console.log(hotspot["name"], { ownerName, rewardScale, onlineStatus, listenAddrs, relayed });
@@ -173,6 +173,9 @@ function formatHotspotStats(hotspots) {
 
 function formatHotspotActivity(allActivity) {
   let output = "";
+
+  // truncate just to first 20 results
+  allActivity = allActivity.slice(0,19);
 
   // headers
   output += "== TYPE".padEnd(activityPaddings[0]);
@@ -354,7 +357,7 @@ function formatType(type) {
       break;
 
     case 'poc_request_v1':
-      output = 'Created Challange'
+      output = 'Created Challenge'
       break;
 
     case 'data_credits':
