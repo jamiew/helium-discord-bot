@@ -1,10 +1,24 @@
 const low = require('lowdb')
 const FileSync = require('lowdb/adapters/FileSync')
+// TODO switch to JSONFile which won't block requests
 
 const adapter = new FileSync(process.env.CONFIG_PATH)
 const db = low(adapter)
 
 db.defaults({ owners: [], hotspots: [], validators: [] }).write()
+
+const initServer = async function (serverID) {
+  const defaults = { owners: [], hotspots: [], validators: [] };
+  const serverKey = `server_${serverID}`;
+  if(db.get(serverKey)){
+    console.log(`${serverKey} appears to be initialized:`, db.get(serverKey));
+    return null;
+  }
+  else {
+    console.log(`Initializing hash for ${serverKey}`);
+    return db.write(serverKey, defaults);
+  }
+}
 
 const addHotspotAddress = async function (address, name) {
   db.get('hotspots').push({
@@ -53,6 +67,8 @@ const getHotspots = function () {
 }
 
 module.exports = {
+  db,
+  initServer,
   addHotspotAddress,
   removeHotspotAddress,
   addOwnerAddress,
