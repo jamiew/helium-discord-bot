@@ -77,7 +77,7 @@ client.on('message', async message => {
     case 'hotspot activity':
       try {
         await message.react("✨");
-		if(args[3]){
+		if(args[4]){
 			args[2] = args[2] + '-' + args[3] + '-' + args[4];
 		}
         activity = await HeliumAPI.getHotspotActivity(args[2]);
