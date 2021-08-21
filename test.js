@@ -33,6 +33,20 @@ process.env.CONFIG_PATH = "testConfig.json";
   output = Bot.formatValidatorStats(validators);
   console.log(output);
 
+  // test support for all possible hotspot names
+  const testHotspots = [
+    '11Kj6LV5M51PzPjBVbtgESL625SsrzdPoi59PDPQ2xdeozNuRuq',
+    'slow-burgundy-mandrill',
+    'slow burgundy mandrill'
+  ];
+  for(testHotspot of testHotspots){
+    testHeader(`hotspot activity ${testHotspot}`);
+    const activity = await HeliumAPI.getHotspotActivity(testHotspot);
+    if(!activity || activity.length == 0){ throw("No activity data") };
+    output = await Bot.formatHotspotActivity(activity);
+    console.log(output);
+  };
+
   // if we got this far we are gtg
   process.exit(0);
 })();

@@ -9,7 +9,7 @@ const log = function (message) {
 
 const httpGet = async function (url) {
   log(`GET ${url}`);
-  let result = await request({
+  const result = await request({
     url: url,
     method: "GET",
     json: true,
@@ -18,28 +18,41 @@ const httpGet = async function (url) {
 };
 
 const fetchHotspotsForOwner = async function (owner) {
-  let rsp = await httpGet(`https://api.helium.io/v1/accounts/${owner}/hotspots`);
+  const rsp = await httpGet(`https://api.helium.io/v1/accounts/${owner}/hotspots`);
+  return rsp.data;
+};
+
+const fetchHotspotsByName = async function (name) {
+  const rsp = await httpGet(`https://api.helium.io/v1/hotspots/name/${name}`);
   return rsp.data;
 };
 
 const fetchRewardSumForHotspot = async function (address) {
-  let rsp = await httpGet(`https://api.helium.io/v1/hotspots/${address}/rewards/sum${queryParams()}`);
+  const rsp = await httpGet(`https://api.helium.io/v1/hotspots/${address}/rewards/sum${queryParams()}`);
+  return rsp.data;
+};
+
+// fetches first 2 pages of activity data; 1st page is usually empty
+const fetchActivityForHotspot = async function (address) {
+  const rsp = await httpGet(`https://api.helium.io/v1/hotspots/${address}/activity`);
+  const cursor = await httpGet(`https://api.helium.io/v1/hotspots/${address}/activity?cursor=${rsp['cursor']}`);
+  Array.prototype.push.apply(rsp.data, cursor.data);
   return rsp.data;
 };
 
 const fetchHotspotDetails = async function (address) {
-  let rsp = await httpGet(`https://api.helium.io/v1/hotspots/${address}`);
+  const rsp = await httpGet(`https://api.helium.io/v1/hotspots/${address}`);
   return rsp.data;
 };
 
 const fetchValidatorDetails = async function (address) {
-  let rsp = await httpGet(`https://api.helium.io/v1/validators/${address}`);
+  const rsp = await httpGet(`https://api.helium.io/v1/validators/${address}`);
   return rsp.data;
 }
 
 const fetchTotalRewardsForValidator = async function (address) {
-  let url = `https://api.helium.io/v1/validators/${address}/rewards/sum?min_time=2020-01-01&max_time=2050-01-01`;
-  let rsp = await httpGet(url);
+  const url = `https://api.helium.io/v1/validators/${address}/rewards/sum?min_time=2020-01-01&max_time=2050-01-01`;
+  const rsp = await httpGet(url);
   // rsp = await httpGet(`${url}&cursor=${rsp['cursor']}`);
   return rsp.data;
 };
@@ -157,8 +170,26 @@ const getHotspotStats = async function () {
   return hotspots;
 };
 
+// "hotspot" argument can be address, or name with or without hyphens
+// e.g. both "slow-burgundy-mandrill" and "slow burgundy mandrill" are valid
+const getHotspotActivity = async function (hotspot) {
+  if(hotspot.includes('-') || hotspot.includes(' ')){
+    hotspot = hotspot.replace(/ /g, '-');
+    const details = await fetchHotspotsByName(hotspot);
+    console.log(details);
+    hotspot = details[0]['address'];
+  }
+
+  // fetch activity, but truncate to 10 lines
+  const activity = await fetchActivityForHotspot(hotspot);
+  activity.hotspot = hotspot;
+
+  return activity;
+};
+
 
 module.exports = {
+  getValidatorStats,
   getHotspotStats,
-  getValidatorStats
+  getHotspotActivity
 };
