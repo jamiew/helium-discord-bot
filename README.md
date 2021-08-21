@@ -88,9 +88,9 @@ Write `hotspot help` to see all the commands for managing owners/hotspots
 hotspot stats
 hotspot config
 
-hotspot activity $address
 hotspot add $address $name
 hotspot remove $address
+hotspot activity ($address|$magic-animal-name)
 
 owner add $address $name
 owner remove $address
