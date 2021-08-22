@@ -9,7 +9,7 @@ const initServer = async function (guildID) {
   // const guildID = `server_${serverID}`;
   console.log(db.get(guildID).value());
   if(db.get(guildID).keys().value().length > 0){
-    console.log(`${guildID} appears to be initialized:`, db.get(guildID).value());
+    console.log(`DB for server ${guildID} is already initialized`);
     console.log(db.get(guildID).get('hotspots').value());
     return null;
   }
