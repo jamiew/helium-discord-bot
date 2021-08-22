@@ -77,6 +77,9 @@ client.on('message', async message => {
     case 'hotspot activity':
       try {
         await message.react("✨");
+		if(args[4]){
+			args[2] = args[2] + '-' + args[3] + '-' + args[4];
+		}
         activity = await HeliumAPI.getHotspotActivity(args[2]);
         if (activity !== undefined) {
           output = formatHotspotActivity(activity);
@@ -174,8 +177,8 @@ function formatHotspotActivity(allActivity) {
   let output = "";
 
   // truncate just to first 20 results
+  allActivity = allActivity.slice(0,(process.env.MAX_ACTIVITY - 1));
   console.log("formatHotspotActivity, # results =>", allActivity.length);
-  allActivity = allActivity.slice(0,19);
 
   // headers
   output += "== TYPE".padEnd(activityPaddings[0]);
@@ -242,7 +245,6 @@ function formatHotspotActivity(allActivity) {
 
     const time = formatEpoch(activity['time']);
 
-    console.log(activity["name"], { type, details, meta, time });
     if (type === '`Received Mining Rewards'){
       output += `${type.padEnd(activityPaddings[0])}${details.padEnd(activityPaddings[3])}`;
       output += `${time}\'`;

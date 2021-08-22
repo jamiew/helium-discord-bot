@@ -187,7 +187,7 @@ const getAddressForHotspot = async function(hotspot) {
   hotspot = hotspot.trim();
   if(hotspot.includes('-') || hotspot.includes(' ')){
     hotspot = hotspot.replace(/ /g, '-');
-    const details = await fetchHotspotByName(hotspot);
+    const details = await fetchHotspotByName(hotspot.toLowerCase());
     if(!details){
       throw(`Failed to fetch address for hotspot name ${hotspot}`);
     }

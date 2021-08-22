@@ -37,7 +37,6 @@ const tests = async () => {
   output = Bot.formatValidatorStats(validators);
   console.log(output);
 
-
   const testHotspot = 'slow-burgundy-mandrill'; // the OG
   testHeader(`hotspot activity ${testHotspot}`);
   const activity = await HeliumAPI.getHotspotActivity(testHotspot);
