@@ -29,13 +29,13 @@ const tests = async () => {
 
   testHeader("hotspot stats");
   const hotspots = await HeliumAPI.getHotspotStats(guildID);
-  if(!hotspots || hotspots.length == 0){ throw("No hotspots") };
+  if(!hotspots || hotspots.length == 0){ throw("No hotspots configured") };
   output = Bot.formatHotspotStats(hotspots);
   console.log(output);
 
   testHeader("validator stats");
   const validators = await HeliumAPI.getValidatorStats(guildID);
-  if(!validators || validators.length == 0){ throw("No validators") };
+  if(!validators || validators.length == 0){ throw("No validators configured") };
   output = Bot.formatValidatorStats(validators);
   console.log(output);
 

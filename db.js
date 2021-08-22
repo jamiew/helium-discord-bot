@@ -2,11 +2,12 @@ const low = require('lowdb')
 const FileSync = require('lowdb/adapters/FileSync')
 // TODO switch to JSONFile which won't block requests
 
-const adapter = new FileSync(process.env.CONFIG_PATH)
-const db = low(adapter)
+const adapter = new FileSync(process.env.CONFIG_PATH);
+const db = low(adapter);
 
 const initServer = async function (guildID) {
   // const guildID = `server_${serverID}`;
+  console.log(db.get(guildID).value());
   if(db.get(guildID).keys().value().length > 0){
     console.log(`${guildID} appears to be initialized:`, db.get(guildID).value());
     console.log(db.get(guildID).get('hotspots').value());
@@ -16,7 +17,10 @@ const initServer = async function (guildID) {
     console.log(`Initializing hash for ${guildID}`);
     const defaults = {}
     defaults[guildID] = { owners: [], hotspots: [], validators: [] };
-    return db.get(guildID).value();
+    db.defaults(defaults).write();
+    const values = db.get(guildID).value();
+    console.log("values =>", values);
+    return values;
   }
 }
 
@@ -31,13 +35,13 @@ const addHotspotAddress = async function (guildID, address, name) {
 };
 
 const removeHotspotAddress = function (guildID, address) {
-  db.get(guildID, 'hotspots')
+  db.get(guildID).get('hotspots')
     .remove({ address: address })
     .write();
 };
 
 const addOwnerAddress = function (guildID, address, name) {
-  db.get(guildID, 'owners')
+  db.get(guildID).get('owners')
     .push({
       address: address,
       name: name
@@ -46,13 +50,13 @@ const addOwnerAddress = function (guildID, address, name) {
 };
 
 const removeOwnerAddress = function (guildID, address) {
-  db.get(guildID, 'owners')
+  db.get(guildID).get('owners')
     .remove({ address: address })
     .write();
 };
 
 const addValidator = function (guildID, address, name) {
-  db.get(guildID, 'validators')
+  db.get(guildID).get('validators')
     .push({
       address: address,
       name: name
@@ -61,28 +65,22 @@ const addValidator = function (guildID, address, name) {
 };
 
 const removeValidator = function (guildID, address) {
-  db.get(guildID, 'validators')
+  db.get(guildID).get('validators')
     .remove({ address: address })
     .write();
 };
 
 
 const getValidators = function (guildID) {
-  console.log("getValidators guildID=>", guildID);
-  const value = db.get(guildID, 'validators').value();
-  console.log("value =>", value);
-  console.log(db.get(guildID).value());
-  console.log(db.get(guildID, 'validators').value());
-  console.log(db.get(guildID).get('validators').value());
-  return value;
+  return db.get(guildID).get('validators').value() || [];
 }
 
 const getOwners = function (guildID) {
-  return db.get(guildID, 'owners').value()
+  return db.get(guildID).get('owners').value() || [];
 }
 
 const getHotspots = function (guildID) {
-  return db.get(guildID).get('hotspots').value()
+  return db.get(guildID).get('hotspots').value() || [];
 }
 
 module.exports = {

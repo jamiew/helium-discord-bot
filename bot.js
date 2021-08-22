@@ -8,10 +8,6 @@ const client = new Discord.Client();
 
 client.on('ready', () => {
   console.log(`Logged in as ${client.user.tag}`);
-
-  DB.initServer().then(function(){
-    console.log("Initialized database", DB.value());
-  });
 });
 
 client.on('message', async message => {
@@ -20,8 +16,12 @@ client.on('message', async message => {
   let output = null;
 
   console.log("message =>", message.content);
-  console.log("guild =>", message.guild.name, message.guild.id);
   const guildID = message.guild.id;
+  const guildName = message.guild.name;
+
+  await DB.initServer(guildID);
+  console.log(`Loaded database for guildID=${guildID} guildName=${guildName}`);
+
 
   if(!guildID){
     console.log(message.content);
@@ -290,7 +290,7 @@ function formatValidatorStats(validators) {
 function formatConfig(guildID) {
   let output = "```ml\n";
 
-  if (DB.getOwners(guildID).length > 0) {
+  if (DB.getValidators(guildID).length > 0) {
     output += 'VALIDATORS\n';
     if (DB.getValidators(guildID).length == 0) { output += "None\n"; }
     DB.getValidators(guildID).forEach(v => {
@@ -308,11 +308,12 @@ function formatConfig(guildID) {
     output += "\n";
   }
 
-  output += 'HOTSPOTS\n';
-  if (DB.getHotspots(guildID).length == 0) { output += "None\n"; }
-  DB.getHotspots(guildID).forEach(hotspot => {
-    output += `${hotspot['name']} > "${hotspot['address']}"\n`
-  });
+  if (DB.getHotspots(guildID).length > 0) {
+    output += 'HOTSPOTS\n';
+    DB.getHotspots(guildID).forEach(hotspot => {
+      output += `${hotspot['name']} > "${hotspot['address']}"\n`
+    });
+  }
 
   output += "\n```";
   return output;
