@@ -42,8 +42,13 @@ hotspot activity slow-burgundy-mandrill
 ```
 ![](https://dl.dropboxusercontent.com/s%2F45qf9hej0slkg3v%2Fscreen%2520shot%25202021-08-21%2520at%252010-42-16%2520hotspots%2520%2528dev%2529%2520-%2520discord.png)
 
+## Install a hosted bot (beta)
 
-## Setup
+If you'd like to add this bot to your server, [visit this link](https://discord.com/oauth2/authorize?client_id=867127109470257164&scope=bot)
+
+This is **very beta and subject to bugs and downtime**. If you see issues, please message @jamiedubs#0001 on Discord or file an issue in this repository.
+
+## Run your own bot
 
 Install [nodejs](https://nodejs.org/en/) and [yarn](https://yarnpkg.com/) and run:
 
