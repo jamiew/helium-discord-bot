@@ -9,15 +9,21 @@ const log = function (message) {
 
 const httpGet = async function (url) {
   log(`GET ${url}`);
-  const result = await request({
-    url: url,
-    method: "GET",
-    json: true,
-    headers: {
-      'User-Agent': 'helium-discord-bot (central)'
-    }
-  });
-  return result;
+
+  try {
+    return await request({
+      url: url,
+      method: "GET",
+      json: true,
+      headers: {
+        'User-Agent': 'helium-discord-bot'
+      }
+    })
+  } catch(error) {
+    console.log("Error in httpGet =>", error);
+    // TODO sleep 1s and retry if it's a 503
+    // await new Promise(r => setTimeout(r, 2000));
+  }
 };
 
 const fetchHotspotsForOwner = async function (owner) {
