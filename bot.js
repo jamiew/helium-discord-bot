@@ -444,6 +444,6 @@ if(!!process.env.TEST) {
 else {
   console.log(`Hotspot bot starting...`);
   console.log(`To add it to your server, visit:`);
-  console.log(`https://discord.com/oauth2/authorize?client_id=${process.env.DISCORD_CLIENT_ID}&scope=bot&permissions=1024`);
+  console.log(`https://discord.com/oauth2/authorize?client_id=${process.env.DISCORD_CLIENT_ID}&scope=bot`);
   client.login(process.env.DISCORD_TOKEN);
 }
