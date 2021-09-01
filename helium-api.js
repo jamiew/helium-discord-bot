@@ -33,14 +33,21 @@ const fetchRewardSumForHotspot = async function (address) {
 };
 
 // fetches first 2 pages of activity data; 1st page is usually empty
-const fetchActivityForHotspot = async function (address) {
-  const rsp = await httpGet(`https://api.helium.io/v1/hotspots/${address}/activity`);
-  if((!rsp.data || rsp.data.length < 10) && !!rsp.cursor){
-    console.log("fetchActivityForHotspot: fetching a second page, only a few results in page 1", rsp.data.length);
-    const cursor = await httpGet(`https://api.helium.io/v1/hotspots/${address}/activity?cursor=${rsp['cursor']}`);
-    Array.prototype.push.apply(rsp.data, cursor.data);
+const fetchActivityForHotspot = async function (address, cursor=null) {
+  const cursorParam = !!cursor ? `?cursor=${cursor}` : '';
+  const rsp = await httpGet(`https://api.helium.io/v1/hotspots/${address}/activity${cursorParam}`);
+  if(rsp.data && rsp.data.length > 0){
+    console.log("fetchActivityForHotspot: found some results, length =>", rsp.data.length);
+    return rsp.data;
   }
-  return rsp.data;
+  else if(!!rsp.cursor) {
+    console.log("fetchActivityForHotspot: fetching another page, no results in previous page, cursor =>", rsp.cursor);
+    return (await fetchActivityForHotspot(address, rsp['cursor']));
+  }
+  else {
+    console.error("fetchActivityForHotspot: no results and no cursor, giving up");
+    return [];
+  }
 };
 
 const fetchHotspotDetails = async function (address) {

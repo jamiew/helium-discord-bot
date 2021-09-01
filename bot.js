@@ -177,7 +177,8 @@ function formatHotspotActivity(allActivity) {
   let output = "";
 
   // truncate just to first 20 results
-  allActivity = allActivity.slice(0,(process.env.MAX_ACTIVITY - 1));
+  const maxActivity = process.env.MAX_ACTIVITY || 10;
+  allActivity = allActivity.slice(0,(maxActivity - 1));
   console.log("formatHotspotActivity, # results =>", allActivity.length);
 
   // headers
