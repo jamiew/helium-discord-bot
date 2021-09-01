@@ -190,11 +190,6 @@ function formatHotspotActivity(allActivity) {
 
   for (let i = 0; i < allActivity.length; i++) {
     const activity = allActivity[i];
-    let now = Math.round(Date.now() / 1000);
-    let days = 60 * 60 * 24 * 1;
-    if(activity['time'] < (now - days)){
-      break;
-    }
     let type = formatType(activity["type"]);
     let details = '';
     let meta = '';
@@ -260,8 +255,6 @@ function formatHotspotActivity(allActivity) {
     // `[x](https://explorer.helium.com/address/${hotspot["address"]}`
   }
 
-  if (process.env.SHOW_TOTAL == '1' && hotspots.length > 1) {
-  }
   return output;
 }
 
