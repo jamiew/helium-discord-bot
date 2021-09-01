@@ -35,7 +35,7 @@ const fetchRewardSumForHotspot = async function (address) {
 // fetches first 2 pages of activity data; 1st page is usually empty
 const fetchActivityForHotspot = async function (address) {
   const rsp = await httpGet(`https://api.helium.io/v1/hotspots/${address}/activity`);
-  if(!rsp.data || rsp.data.length < 10 || !!rsp.cursor){
+  if((!rsp.data || rsp.data.length < 10) && !!rsp.cursor){
     console.log("fetchActivityForHotspot: fetching a second page, only a few results in page 1", rsp.data.length);
     const cursor = await httpGet(`https://api.helium.io/v1/hotspots/${address}/activity?cursor=${rsp['cursor']}`);
     Array.prototype.push.apply(rsp.data, cursor.data);
