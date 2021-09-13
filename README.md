@@ -8,6 +8,10 @@ If you'd like to add this bot to your server, [visit this link](https://discord.
 
 This hosted bot is **very beta and subject to bugs and downtime**. If you see issues, please message @jamiedubs#0001 on Discord or file an issue in this repository.
 
+Enjoying this bot? HNT tips are always appreciated: `133pR1mh1E8AMoPffWWNtFr7eyddpr8wjLs4hSQJJhCcyop7e9q`
+
+![QR code for author's HNT wallet](https://dl.dropboxusercontent.com/s%2Fqrxg5wlnijeyitq%2Fscreen%2520shot%25202021-09-13%2520at%252010-47-50%2520account%2520133pr1mh1e8amopffwwntfr7eyddpr8wjls4hsqjjhccyop7e9q%2520%2520helium%2520explorer.png)
+
 ## Usage
 
 Once configured, you can type:
