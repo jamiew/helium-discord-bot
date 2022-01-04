@@ -1,58 +1,91 @@
 const low = require('lowdb')
 const FileSync = require('lowdb/adapters/FileSync')
+// TODO switch to JSONFile which won't block requests
 
-const adapter = new FileSync(process.env.CONFIG_PATH)
-const db = low(adapter)
+const adapter = new FileSync(process.env.CONFIG_PATH);
+const db = low(adapter);
 
-db.defaults({ owners: [], hotspots: [], validators: [] }).write()
-
-const addHotspotAddress = async function (address, name) {
-  db.get('hotspots').push({
-    address: address,
-    name: name
-  }).write();
-};
-
-const removeHotspotAddress = function (address) {
-  db.get('hotspots').remove({ address: address }).write();
-};
-
-const addOwnerAddress = function (address, name) {
-  db.get('owners').push({
-    address: address,
-    name: name
-  }).write();
-};
-
-const removeOwnerAddress = function (address) {
-  db.get('owners').remove({ address: address }).write();
-};
-
-const addValidator = function (address, name) {
-  db.get('validators').push({
-    address: address,
-    name: name
-  }).write();
-};
-
-const removeValidator = function (address) {
-  db.get('validators').remove({ address: address }).write();
-};
-
-
-const getValidators = function () {
-  return db.get('validators').value();
+const initServer = async function (guildID) {
+  // const guildID = `server_${serverID}`;
+  console.log(db.get(guildID).value());
+  if(db.get(guildID).keys().value().length > 0){
+    console.log(`DB for server ${guildID} is already initialized`);
+    console.log(db.get(guildID).get('hotspots').value());
+    return null;
+  }
+  else {
+    console.log(`Initializing hash for ${guildID}`);
+    const defaults = {}
+    defaults[guildID] = { owners: [], hotspots: [], validators: [] };
+    db.defaults(defaults).write();
+    const values = db.get(guildID).value();
+    console.log("values =>", values);
+    return values;
+  }
 }
 
-const getOwners = function () {
-  return db.get('owners').value()
+const addHotspotAddress = async function (guildID, address, name) {
+  db.get(guildID)
+    .get('hotspots')
+    .push({
+      address: address,
+      name: name
+    })
+    .write();
+};
+
+const removeHotspotAddress = function (guildID, address) {
+  db.get(guildID).get('hotspots')
+    .remove({ address: address })
+    .write();
+};
+
+const addOwnerAddress = function (guildID, address, name) {
+  db.get(guildID).get('owners')
+    .push({
+      address: address,
+      name: name
+    })
+    .write();
+};
+
+const removeOwnerAddress = function (guildID, address) {
+  db.get(guildID).get('owners')
+    .remove({ address: address })
+    .write();
+};
+
+const addValidator = function (guildID, address, name) {
+  db.get(guildID).get('validators')
+    .push({
+      address: address,
+      name: name
+    })
+    .write();
+};
+
+const removeValidator = function (guildID, address) {
+  db.get(guildID).get('validators')
+    .remove({ address: address })
+    .write();
+};
+
+
+const getValidators = function (guildID) {
+  return db.get(guildID).get('validators').value() || [];
 }
 
-const getHotspots = function () {
-  return db.get('hotspots').value()
+const getOwners = function (guildID) {
+  return db.get(guildID).get('owners').value() || [];
+}
+
+const getHotspots = function (guildID) {
+  return db.get(guildID).get('hotspots').value() || [];
 }
 
 module.exports = {
+  db,
+  initServer,
   addHotspotAddress,
   removeHotspotAddress,
   addOwnerAddress,

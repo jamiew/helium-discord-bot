@@ -13,6 +13,9 @@ const httpGet = async function (url) {
     url: url,
     method: "GET",
     json: true,
+    headers: {
+      'User-Agent': 'helium-discord-bot (central)'
+    }
   });
   return result;
 };
@@ -83,41 +86,32 @@ const dateTimeParams = function () {
   return "max_time=" + formatDate(maxTime) + "&min_time=" + formatDate(minTime);
 };
 
-const listValidators = function () {
-  let validators = DB.getValidators();
-  if (validators === undefined) {
-    return undefined;
-  }
-
+const listValidators = function (guildID) {
+  const validators = DB.getValidators(guildID);
+  if (validators === undefined) { return undefined; }
   return new Map(validators.map(x => [x['address'], x['name']] ));
 };
 
-const listOwners = function () {
-  let owners = DB.getOwners();
-  if (owners === undefined) {
-    return undefined;
-  }
-
+const listOwners = function (guildID) {
+  const owners = DB.getOwners(guildID);
+  if (owners === undefined) { return undefined; }
   return new Map(owners.map(x => [x['address'], x['name']] ));
 };
 
-const listHotspots = function () {
-  let hotspots = DB.getHotspots();
-  if (hotspots === undefined) {
-    return undefined;
-  }
-
+const listHotspots = function (guildID) {
+  const hotspots = DB.getHotspots(guildID);
+  if (hotspots === undefined) { return undefined; }
   return new Map(hotspots.map(x => [x['address'], x['name']] ));
 };
 
-const getValidatorStats = async function () {
-  if (listValidators() === undefined || listValidators().size == 0) {
+const getValidatorStats = async function (guildID) {
+  if (listValidators(guildID) === undefined || listValidators(guildID).size == 0) {
     log("getValidatorStats: VALIDATORS are not set, please add some using the bot commands (see `helium help`)");
     return undefined;
   }
 
   const validators = [];
-  for (let validator of listValidators()) {
+  for (let validator of listValidators(guildID)) {
     let _validator = await fetchTotalRewardsForValidator(validator[0]);
     const details = await fetchValidatorDetails(validator[0]);
     // console.debug("Loaded validator: ", _validator, details);
@@ -130,10 +124,10 @@ const getValidatorStats = async function () {
   return validators;
 }
 
-const getHotspotStats = async function () {
+const getHotspotStats = async function (guildID) {
   // abort if HOTSPOT_OWNERS is not set (see .env)
-  if (listOwners() === undefined && listHotspots() === undefined) {
-    log("helium-hotspots: HOTSPOTS and OWNERS are not set, please add some using the bot commands");
+  if (listOwners(guildID) === undefined && listHotspots(guildID) === undefined) {
+    log("helium-hotspots: missing both owners and hotspots, please add some using the bot commands");
     return;
   }
 
@@ -141,8 +135,8 @@ const getHotspotStats = async function () {
   // TODO make this execute in parallel
   let hotspots = [];
 
-  if (listOwners() !== undefined) {
-    for (let owner of listOwners()) {
+  if (listOwners(guildID) !== undefined) {
+    for (let owner of listOwners(guildID)) {
       let _hotspots = await fetchHotspotsForOwner(owner[0]);
       log(`Found ${_hotspots.length} hotspots for ${owner[0]} owned by ${owner[1]}`);
       for (let hotspot of _hotspots) {
@@ -152,8 +146,8 @@ const getHotspotStats = async function () {
     }
   }
 
-  if (listHotspots() !== undefined) {
-    for (let hotspot of listHotspots()) {
+  if (listHotspots(guildID) !== undefined) {
+    for (let hotspot of listHotspots(guildID)) {
       let _hotspot = await fetchHotspotDetails(hotspot[0]);
       _hotspot['displayName'] = hotspot[1];
       hotspots.push(_hotspot);
