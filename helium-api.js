@@ -13,6 +13,9 @@ const httpGet = async function (url) {
     url: url,
     method: "GET",
     json: true,
+    headers: {
+      'User-Agent': 'helium-discord-bot (central)'
+    }
   });
   return result;
 };
